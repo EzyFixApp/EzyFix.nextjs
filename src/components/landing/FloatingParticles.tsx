@@ -9,7 +9,6 @@ export default function FloatingParticles() {
       <div className="absolute bottom-[25%] left-[20%] size-40 animate-pulse rounded-full bg-white/10 blur-3xl delay-300" />
       <div className="absolute right-[25%] bottom-[35%] size-28 animate-pulse rounded-full bg-white/12 blur-2xl delay-500" />
 
-      {/* Animated gradient orbs */}
       <div
         className="absolute top-1/3 left-1/4 size-64 animate-spin rounded-full opacity-20 blur-3xl lg:size-96"
         style={{
