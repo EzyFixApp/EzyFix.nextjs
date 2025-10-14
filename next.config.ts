@@ -11,6 +11,11 @@ const baseConfig: NextConfig = {
   },
   poweredByHeader: false,
   reactStrictMode: true,
+  devIndicators: {
+    appIsrStatus: false,
+    buildActivity: false,
+    buildActivityPosition: 'bottom-right',
+  },
   outputFileTracingIncludes: {
     '/': ['./migrations/**/*'],
   },

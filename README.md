@@ -1,4 +1,4 @@
-# Features
+~# Features
 
 Developer experience first, extremely flexible code structure and only keep what you need:
 
@@ -91,9 +91,6 @@ Then, you can run the project locally in development mode with live reload by ex
 ```shell
 npm run dev
 ```
-
-
-
 Open http://localhost:3000 with your favorite browser to see your project. For your information, the project is already pre-configured with a local database using PGlite. No extra setup is required to run the project locally.
 
 ### Set up authentication
@@ -174,9 +171,6 @@ After making changes to the schema, generate a migration by running the followin
 ```shell
 npm run db:generate
 ```
-
-
-
 This will create a migration file that reflects your schema changes.
 
 Migrations are automatically applied during Next.js initialization through `instrumentation.ts`. Simply restart your Next.js server to apply the database changes.
@@ -212,9 +206,6 @@ All unit tests are located alongside the source code in the same directory, maki
 ```shell
 npm run test
 ```
-
-
-
 ### Integration & E2E Testing
 
 The project uses Playwright for integration and end-to-end (E2E) testing. Integration test files use the `*.spec.ts` extension, while E2E test files use the `*.e2e.ts` extension. You can run the tests with the following commands:
@@ -229,7 +220,7 @@ npm run test:e2e
 Storybook is configured for UI component development and testing. The project uses Storybook with Next.js and Vite integration, including accessibility testing and documentation features.
 
 Stories are located alongside your components in the `src` directory and follow the pattern `*.stories.ts` or `*.stories.tsx`.
-
+~
 You can run Storybook in development mode with:
 
 ```shell
@@ -253,9 +244,6 @@ Then, you can generate a production build with:
 ```shell
 $ npm run build
 ```
-
-
-
 It generates an optimized production build of the boilerplate. To test the generated build, run:
 
 ```shell
