@@ -92,34 +92,71 @@ const HowItWorks = () => {
         {/* Desktop view - horizontal */}
         <div className="hidden md:block">
           <div className="relative">
-            {/* Connection line */}
-            <div className="absolute top-24 right-0 left-0 h-1 bg-gradient-to-r from-[#609CEF] via-[#4F8BE8] to-[#3D7CE0]" />
+            {/* Animated gradient line */}
+            <div className="absolute top-24 right-0 left-0 h-1 overflow-hidden rounded-full bg-gradient-to-r from-[#609CEF]/20 via-[#4F8BE8]/20 to-[#3D7CE0]/20">
+              <div className="h-full w-full animate-[shimmer_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-[#609CEF] to-transparent" />
+            </div>
+
+            <style jsx>
+              {`
+              @keyframes shimmer {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+              }
+              @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+              }
+              @keyframes pulse-ring {
+                0% { transform: scale(0.95); opacity: 1; }
+                50% { transform: scale(1); opacity: 0.8; }
+                100% { transform: scale(0.95); opacity: 1; }
+              }
+            `}
+            </style>
 
             <div className="grid grid-cols-3 gap-8">
               {steps.map((step, index) => (
                 <div
                   key={step.number}
-                  className={`relative transition-all duration-700 ${
+                  className={`group relative transition-all duration-700 ${
                     isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                   }`}
                   style={{ transitionDelay: `${index * 200}ms` }}
                 >
-                  {/* Number circle */}
-                  <div className="relative z-10 mx-auto mb-8 flex size-48 items-center justify-center rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] shadow-xl">
-                    <div className="text-center">
-                      <div className="mb-2 flex justify-center">{step.icon}</div>
-                      <div className="text-2xl font-bold text-white">
-                        {step.number}
+                  {/* Floating background glow */}
+                  <div className="absolute inset-0 -z-10 translate-y-8 rounded-3xl bg-gradient-to-br from-[#609CEF]/10 via-purple-500/5 to-[#3D7CE0]/10 opacity-0 blur-2xl transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100" />
+
+                  {/* Number circle with pulsing ring */}
+                  <div className="relative z-10 mx-auto mb-8 flex size-48 items-center justify-center">
+                    {/* Pulsing outer ring */}
+                    <div className="absolute inset-0 animate-[pulse-ring_2s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-[#609CEF]/30 to-[#3D7CE0]/30 blur-sm" style={{ animationDelay: `${index * 0.3}s` }} />
+
+                    {/* Main circle with hover animation */}
+                    <div className="relative size-full animate-[float_3s_ease-in-out_infinite] rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] p-1 shadow-xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-[#609CEF]/50" style={{ animationDelay: `${index * 0.4}s` }}>
+                      <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0]">
+                        <div className="text-center">
+                          <div className="mb-2 flex justify-center transition-transform duration-300 group-hover:scale-110">{step.icon}</div>
+                          <div className="text-2xl font-bold text-white">
+                            {step.number}
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Shine effect on hover */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="text-center">
-                    <h3 className="mb-3 text-2xl font-bold text-gray-900">
+                  {/* Content with slide-up animation */}
+                  <div className="text-center transition-all duration-500 group-hover:-translate-y-2">
+                    <h3 className="mb-3 text-2xl font-bold text-gray-900 transition-colors duration-300 group-hover:text-[#609CEF]">
                       {step.title}
                     </h3>
-                    <p className="text-gray-600">{step.description}</p>
+                    <p className="text-gray-600 transition-all duration-300 group-hover:text-gray-700">{step.description}</p>
+
+                    {/* Animated underline on hover */}
+                    <div className="mx-auto mt-4 h-1 w-0 rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] transition-all duration-500 group-hover:w-24" />
                   </div>
                 </div>
               ))}

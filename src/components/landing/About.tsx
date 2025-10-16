@@ -45,7 +45,7 @@ const About = () => {
           <h2 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">
             Về
             {' '}
-            <span className="bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#A8D5FF] via-[#7CB8F7] to-[#4A9BF5] bg-clip-text text-transparent">
               EzyFix
             </span>
           </h2>

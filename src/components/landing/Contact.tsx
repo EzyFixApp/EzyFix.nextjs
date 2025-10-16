@@ -45,6 +45,7 @@ const Contact = () => {
 
   return (
     <section
+      id="contact"
       ref={sectionRef}
       className="bg-gradient-to-br from-gray-50 to-blue-50 py-20 md:py-32"
     >
@@ -86,8 +87,29 @@ const Contact = () => {
                 rel="noopener noreferrer"
                 className="mb-6 inline-flex items-center gap-3 rounded-2xl bg-white px-6 py-4 text-gray-900 shadow-lg transition-all hover:scale-105"
               >
-                <svg className="size-10" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
+                <svg className="size-10" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="playIconGradientContact1" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#00D7FF" />
+                      <stop offset="100%" stopColor="#0095D5" />
+                    </linearGradient>
+                    <linearGradient id="playIconGradientContact2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#FF3A44" />
+                      <stop offset="100%" stopColor="#C31162" />
+                    </linearGradient>
+                    <linearGradient id="playIconGradientContact3" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#FFD800" />
+                      <stop offset="100%" stopColor="#FF8800" />
+                    </linearGradient>
+                    <linearGradient id="playIconGradientContact4" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#00F076" />
+                      <stop offset="100%" stopColor="#00C96B" />
+                    </linearGradient>
+                  </defs>
+                  <path fill="url(#playIconGradientContact1)" d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5Z" />
+                  <path fill="url(#playIconGradientContact2)" d="M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12Z" />
+                  <path fill="url(#playIconGradientContact3)" d="M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81Z" />
+                  <path fill="url(#playIconGradientContact4)" d="M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
                 </svg>
                 <div className="text-left">
                   <div className="text-xs">Tải trên</div>
