@@ -121,43 +121,68 @@ const AISection = () => {
             <div className="relative">
               {/* AI Brain illustration */}
               <div className="relative mx-auto aspect-square w-full max-w-md">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] opacity-10 blur-3xl" />
-                <div className="relative flex size-full items-center justify-center">
-                  <svg
-                    className="size-64 text-[#609CEF]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                    />
-                  </svg>
+                {/* Gradient background glow */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#609CEF]/20 via-purple-500/10 to-[#3D7CE0]/20 blur-3xl" />
+
+                {/* Orbital rings */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Outer ring */}
+                  <div className="absolute size-80 animate-spin rounded-full border-2 border-dashed border-[#609CEF]/30" style={{ animationDuration: '20s' }} />
+                  {/* Middle ring */}
+                  <div className="absolute size-64 animate-spin rounded-full border-2 border-dotted border-purple-400/40" style={{ animationDuration: '15s', animationDirection: 'reverse' }} />
+                  {/* Inner ring */}
+                  <div className="absolute size-48 animate-spin rounded-full border-2 border-[#3D7CE0]/30" style={{ animationDuration: '10s' }} />
                 </div>
 
-                {/* Floating elements */}
-                <div className="absolute top-1/4 left-0 animate-pulse">
-                  <div className="rounded-lg bg-white p-3 shadow-lg">
+                {/* Center AI Icon */}
+                <div className="relative flex size-full items-center justify-center">
+                  <div className="group relative">
+                    <svg
+                      className="size-32 text-[#609CEF] drop-shadow-2xl transition-all duration-500 hover:scale-110 hover:text-[#3D7CE0]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Floating feature cards */}
+                <div className="absolute -top-4 -right-4 animate-bounce" style={{ animationDuration: '3s', animationDelay: '0s' }}>
+                  <div className="rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:ring-[#609CEF]">
                     <svg className="size-8 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="absolute top-1/3 -left-4 animate-bounce" style={{ animationDuration: '3s', animationDelay: '0.5s' }}>
+                  <div className="rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:ring-[#609CEF]">
+                    <svg className="size-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
                 </div>
-                <div className="absolute top-1/3 right-0 animate-pulse delay-300">
-                  <div className="rounded-lg bg-white p-3 shadow-lg">
-                    <svg className="size-8 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <div className="absolute -bottom-4 left-1/4 animate-bounce" style={{ animationDuration: '3s', animationDelay: '1s' }}>
+                  <div className="rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:ring-[#609CEF]">
+                    <svg className="size-8 text-[#3D7CE0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                 </div>
-                <div className="absolute bottom-1/4 left-1/4 animate-pulse delay-500">
-                  <div className="rounded-lg bg-white p-3 shadow-lg">
-                    <svg className="size-8 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+
+                <div className="absolute -right-6 bottom-1/4 animate-bounce" style={{ animationDuration: '3s', animationDelay: '1.5s' }}>
+                  <div className="rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:ring-[#609CEF]">
+                    <svg className="size-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   </div>
                 </div>

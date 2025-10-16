@@ -39,7 +39,7 @@ function Fallback() {
 
 export default function RotatingEarth() {
   return (
-    <div className="absolute inset-0 -z-20 h-full w-full opacity-60">
+    <div className="absolute inset-0 -z-20 h-full w-full opacity-80">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 45 }}
         gl={{ alpha: true, antialias: true }}

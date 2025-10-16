@@ -130,7 +130,7 @@ const Footer = () => {
         {/* Social Links */}
         <div className="mt-8 flex items-center justify-center gap-4 border-t border-gray-800 pt-8">
           <a
-            href="https://facebook.com/ezyfix"
+            href="https://www.facebook.com/profile.php?id=61581405073489"
             target="_blank"
             rel="noopener noreferrer"
             className="flex size-10 items-center justify-center rounded-full bg-gray-800 transition-colors hover:bg-[#609CEF]"
