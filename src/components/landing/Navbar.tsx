@@ -1,13 +1,52 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Link } from '@/libs/I18nNavigation';
+
+import { Link, usePathname } from '@/libs/I18nNavigation';
+import { routing } from '@/libs/I18nRouting';
+
+const FlagVN = () => (
+  <Image
+    src="/assets/images/flags/vn.jpg"
+    alt="Việt Nam"
+    width={20}
+    height={14}
+    className="rounded"
+  />
+);
+
+const FlagGB = () => (
+  <Image
+    src="/assets/images/flags/en.jpg"
+    alt="United Kingdom"
+    width={20}
+    height={14}
+    className="rounded"
+  />
+);
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('Navbar');
+
+  const localeLabels: Record<string, string> = {
+    vi: 'Tiếng Việt',
+    en: 'English',
+  };
+
+  const localeFlags: Record<string, React.ReactNode> = {
+    vi: <FlagVN />,
+    en: <FlagGB />,
+  };
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -24,24 +63,37 @@ const Navbar = () => {
     };
   }, []);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.dropdown-container')) {
+        setOpenDropdown(null);
+        setIsLangDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const navLinks = [
-    { href: '#about', label: 'Về chúng tôi', hasDropdown: false },
     {
       href: '#customer',
-      label: 'Khách hàng',
+      label: t('customer'),
       hasDropdown: true,
       submenu: [
-        { href: '/benefits/customer', label: 'Quyền lợi', isPage: true },
-        { href: '/rules/customer', label: 'Quy tắc ứng xử', isPage: true },
+        { href: '/benefits/customer', label: t('benefits'), isPage: true },
+        { href: '/rules/customer', label: t('rules'), isPage: true },
       ],
     },
     {
       href: '#technician',
-      label: 'Thợ sửa chữa',
+      label: t('technician'),
       hasDropdown: true,
       submenu: [
-        { href: '/benefits/technician', label: 'Quyền lợi', isPage: true },
-        { href: '/rules/technician', label: 'Quy tắc ứng xử', isPage: true },
+        { href: '/benefits/technician', label: t('benefits'), isPage: true },
+        { href: '/rules/technician', label: t('rules'), isPage: true },
       ],
     },
   ];
@@ -98,7 +150,7 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden items-center space-x-8 md:flex">
             {navLinks.map(link => (
-              <div key={link.href} className="relative">
+              <div key={link.href} className="dropdown-container relative">
                 {link.hasDropdown
                   ? (
                       <div className="relative">
@@ -187,25 +239,26 @@ const Navbar = () => {
                   : 'bg-white text-[#609CEF] shadow-lg'
               }`}
             >
-              Tải ứng dụng
+              {t('download_app')}
             </a>
 
             {/* Language Selector */}
-            <div className="relative">
+            <div className="dropdown-container relative">
               <button
                 type="button"
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                 className={`flex items-center space-x-2 text-sm font-medium transition-colors ${
                   isScrolled
                     ? 'text-gray-700 hover:text-[#609CEF]'
                     : 'text-gray-800 hover:text-[#3D7CE0]'
                 }`}
               >
-                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>VI</span>
+                <span className="text-2xl">{localeFlags[locale]}</span>
+                <span>{locale.toUpperCase()}</span>
                 <svg
-                  className="size-4"
+                  className={`size-4 transition-transform duration-200 ${
+                    isLangDropdownOpen ? 'rotate-180' : ''
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -218,6 +271,33 @@ const Navbar = () => {
                   />
                 </svg>
               </button>
+
+              {/* Language Dropdown Menu */}
+              {isLangDropdownOpen && (
+                <div className="absolute top-full right-0 z-10 mt-3 w-max">
+                  <div className="overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-gray-900/5">
+                    <div className="py-2">
+                      {routing.locales.map(lang => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => {
+                            router.push(`/${lang}${pathname}`);
+                            router.refresh();
+                            setIsLangDropdownOpen(false);
+                          }}
+                          className={`flex w-full items-center space-x-2 px-4 py-2.5 text-left text-sm font-medium transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-[#609CEF] ${
+                            locale === lang ? 'bg-blue-50 text-[#609CEF]' : 'text-gray-700'
+                          }`}
+                        >
+                          <span className="text-xl">{localeFlags[lang]}</span>
+                          <span>{localeLabels[lang] || lang.toUpperCase()}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -329,17 +409,54 @@ const Navbar = () => {
                 rel="noopener noreferrer"
                 className="mx-4 block rounded-lg bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] px-4 py-2 text-center text-sm font-semibold text-white"
               >
-                Tải ứng dụng
+                {t('download_app')}
               </a>
-              <button
-                type="button"
-                className="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700"
-              >
-                <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Tiếng Việt</span>
-              </button>
+
+              {/* Mobile Language Selector */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                  className="flex w-full items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#609CEF]"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">{localeFlags[locale]}</span>
+                    <span>{localeLabels[locale] || locale.toUpperCase()}</span>
+                  </div>
+                  <svg
+                    className={`size-4 transition-transform duration-200 ${
+                      isLangDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isLangDropdownOpen && (
+                  <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-4">
+                    {routing.locales.map(lang => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => {
+                          router.push(`/${lang}${pathname}`);
+                          router.refresh();
+                          setIsLangDropdownOpen(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center space-x-2 py-2 text-left text-sm transition-colors ${
+                          locale === lang ? 'font-semibold text-[#609CEF]' : 'text-gray-600 hover:text-[#609CEF]'
+                        }`}
+                      >
+                        <span className="text-xl">{localeFlags[lang]}</span>
+                        <span>{localeLabels[lang] || lang.toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

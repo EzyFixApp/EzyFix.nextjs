@@ -1,9 +1,11 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/landing/Navbar';
 
 const RulesTechnicianPage = () => {
+  const t = useTranslations('RulesTechnicianPage');
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +34,7 @@ const RulesTechnicianPage = () => {
 
   const sections = [
     {
-      title: 'Đạo đức nghề nghiệp',
+      title: t('section1_title'),
       icon: (
         <svg className="size-12 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -40,77 +42,96 @@ const RulesTechnicianPage = () => {
       ),
       items: [
         {
-          subtitle: 'Tác phong Chuyên nghiệp',
+          subtitle: t('section1_sub1_title'),
           points: [
-            'Trang phục: Luôn mặc đồng phục sạch sẽ, gọn gàng trong suốt quá trình làm việc',
-            'Giao tiếp: Thái độ lịch sự, thân thiện và tôn trọng khách hàng. Không sử dụng ngôn ngữ khiếm nhã',
-            'Thái độ: Thể hiện sự tận tâm, hợp tác và sẵn sàng hỗ trợ khách hàng',
+            t('section1_sub1_point1'),
+            t('section1_sub1_point2'),
+            t('section1_sub1_point3'),
           ],
         },
         {
-          subtitle: 'Trách nhiệm trong Công việc',
+          subtitle: t('section1_sub2_title'),
           points: [
-            'Đúng giờ: Đến đúng thời gian đã hẹn, báo trước nếu có sự chậm trễ',
-            'Chất lượng: Đảm bảo công việc được thực hiện đúng kỹ thuật và tiêu chuẩn',
-            'Bảo vệ tài sản: Tôn trọng và bảo vệ tài sản của khách hàng',
-          ],
-        },
-        {
-          subtitle: 'Tính Trung thực',
-          points: [
-            'Báo giá minh bạch: Cung cấp báo giá chi tiết và chính xác',
-            'Thông tin trung thực: Không phóng đại vấn đề hoặc giấu giếm thông tin',
-            'Cam kết thực hiện: Chỉ nhận việc trong khả năng và chuyên môn của mình',
-          ],
-        },
-        {
-          subtitle: 'Bảo mật thông tin',
-          points: [
-            'Không tiết lộ thông tin cá nhân, địa chỉ của khách hàng cho bên thứ ba',
-            'Không chụp ảnh, quay phim không gian riêng tư của khách hàng',
-            'Tuân thủ nghiêm ngặt chính sách bảo mật của EzyFix',
+            t('section1_sub2_point1'),
+            t('section1_sub2_point2'),
+            t('section1_sub2_point3'),
           ],
         },
       ],
     },
     {
-      title: 'Quy định hoạt động trên ứng dụng',
+      title: t('section2_title'),
       icon: (
         <svg className="size-12 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
       items: [
         {
-          subtitle: 'Quản lý Tài khoản',
+          subtitle: t('section2_sub1_title'),
           points: [
-            'Xác thực danh tính (eKYC): Hoàn thành xác thực bằng CCCD gốc, chính chủ và còn hiệu lực',
-            'Đăng ký nghiệp vụ: Chỉ đăng ký các ngành nghề có đủ năng lực thực hiện',
-            'Kiểm tra nghiệp vụ: Vượt qua bài kiểm tra để bắt đầu nhận việc',
+            t('section2_sub1_point1'),
+            t('section2_sub1_point2'),
+            t('section2_sub1_point3'),
           ],
         },
         {
-          subtitle: 'Quy trình Nhận việc',
+          subtitle: t('section2_sub2_title'),
           points: [
-            'Quản lý trạng thái: Chủ động bật/tắt nhận việc để hệ thống phù hợp',
-            'Phản hồi nhanh: Chấp nhận hoặc từ chối yêu cầu trong thời gian quy định',
-            'Cam kết thực hiện: Một khi đã chấp nhận, phải hoàn thành đúng hẹn',
+            t('section2_sub2_point1'),
+            t('section2_sub2_point2'),
+            t('section2_sub2_point3'),
+          ],
+        },
+      ],
+    },
+    {
+      title: t('section3_title'),
+      icon: (
+        <svg className="size-12 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      items: [
+        {
+          subtitle: t('section3_sub1_title'),
+          points: [
+            t('section3_sub1_point1'),
+            t('section3_sub1_point2'),
           ],
         },
         {
-          subtitle: 'Quy trình Báo giá',
+          subtitle: t('section3_sub2_title'),
           points: [
-            'Báo giá chính xác: Dựa trên thông tin khách hàng cung cấp',
-            'Giải thích rõ ràng: Tư vấn chi tiết về phương án sửa chữa và chi phí',
-            'Không ép buộc: Tôn trọng quyết định của khách hàng',
+            t('section3_sub2_point1'),
+            t('section3_sub2_point2'),
+          ],
+        },
+      ],
+    },
+    {
+      title: t('section4_title'),
+      icon: (
+        <svg className="size-12 text-[#609CEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      items: [
+        {
+          subtitle: t('section4_title2'),
+          points: [
+            t('section4_point1'),
+            t('section4_point2'),
+            t('section4_point3'),
           ],
         },
         {
-          subtitle: 'Hoàn thành và Thanh toán',
+          subtitle: t('section5_title'),
           points: [
-            'Bàn giao công việc: Kiểm tra kỹ lưỡng trước khi bàn giao',
-            'Thanh toán qua ứng dụng: Mọi giao dịch phải thông qua EzyFix',
-            'Hoá đơn điện tử: Cung cấp hoá đơn cho mọi giao dịch',
+            t('section5_item1'),
+            t('section5_item2'),
+            t('section5_item3'),
+            t('section5_item4'),
           ],
         },
       ],
@@ -130,15 +151,15 @@ const RulesTechnicianPage = () => {
                 <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-sm font-medium">Hiệu lực từ 01/01/2025</span>
+                <span className="text-sm font-medium">{t('effective_date')}</span>
               </div>
               <h1 className="mb-4 text-4xl font-extrabold md:text-5xl lg:text-6xl">
-                Bộ Quy tắc Ứng xử
+                {t('title')}
                 <br />
-                <span className="text-white/90">dành cho Thợ Sửa chữa</span>
+                <span className="text-white/90">EzyFix</span>
               </h1>
               <p className="mx-auto max-w-3xl text-lg text-white/90 md:text-xl">
-                Xây dựng cộng đồng thợ uy tín, chuyên nghiệp và được khách hàng tin tưởng
+                {t('subtitle')}
               </p>
             </div>
           </div>
@@ -154,19 +175,18 @@ const RulesTechnicianPage = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">Giới thiệu</h2>
+                <h2 className="text-3xl font-bold text-gray-900">{t('intro_title')}</h2>
               </div>
               <div className="space-y-4 text-lg leading-relaxed text-gray-600">
                 <p>
-                  Chào mừng bạn đến với
+                  {t('intro_welcome')}
                   {' '}
                   <span className="font-semibold text-[#609CEF]">EzyFix</span>
                   {' '}
-                  - nền tảng kết nối dịch vụ sửa chữa uy tín, chuyên nghiệp tại Việt Nam.
+                  {t('intro_platform')}
                 </p>
                 <p>
-                  Bộ Quy tắc này quy định các tiêu chuẩn về hành vi, đạo đức nghề nghiệp và trách nhiệm
-                  mà mọi Thợ Sửa chữa cần tuân thủ khi hoạt động trên nền tảng.
+                  {t('intro_purpose')}
                 </p>
                 <div className="mt-6 rounded-xl bg-gradient-to-r from-[#609CEF]/10 to-[#3D7CE0]/10 p-6">
                   <div className="flex gap-3">
@@ -174,7 +194,7 @@ const RulesTechnicianPage = () => {
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <p className="font-medium text-[#609CEF]">
-                      Bằng việc đăng ký và sử dụng ứng dụng, bạn xác nhận đã đọc kỹ và đồng ý tuân thủ toàn bộ các điều khoản trong Quy tắc này.
+                      {t('intro_agreement')}
                     </p>
                   </div>
                 </div>
@@ -251,10 +271,10 @@ const RulesTechnicianPage = () => {
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   </div>
-                  <h2 className="text-3xl font-bold text-emerald-900">Khen thưởng</h2>
+                  <h2 className="text-3xl font-bold text-emerald-900">{t('reward_title')}</h2>
                 </div>
                 <p className="mb-8 text-lg text-emerald-800">
-                  EzyFix luôn ghi nhận và trân trọng những đóng góp tích cực. Thợ có thành tích xuất sắc sẽ nhận được:
+                  {t('reward_desc')}
                 </p>
               </div>
               <div className="bg-white p-8 md:p-12">
@@ -266,8 +286,8 @@ const RulesTechnicianPage = () => {
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       ),
-                      title: 'Huy hiệu Uy Tín',
-                      description: 'Gắn trên hồ sơ',
+                      title: t('reward1_title'),
+                      description: t('reward1_desc'),
                     },
                     {
                       icon: (
@@ -275,8 +295,8 @@ const RulesTechnicianPage = () => {
                           <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                         </svg>
                       ),
-                      title: 'Ưu tiên Việc',
-                      description: 'Đơn tiềm năng',
+                      title: t('reward2_title'),
+                      description: t('reward2_desc'),
                     },
                     {
                       icon: (
@@ -284,8 +304,8 @@ const RulesTechnicianPage = () => {
                           <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                         </svg>
                       ),
-                      title: 'Ưu đãi',
-                      description: 'Voucher đặc biệt',
+                      title: t('reward3_title'),
+                      description: t('reward3_desc'),
                     },
                   ].map((reward, index) => (
                     <div key={index} className="group rounded-xl border-2 border-gray-100 bg-gray-50 p-6 text-center transition-all hover:border-emerald-300 hover:shadow-md">
@@ -313,12 +333,13 @@ const RulesTechnicianPage = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h2 className="text-3xl font-bold text-white">Cam kết từ EzyFix</h2>
+                  <h2 className="text-3xl font-bold text-white">{t('commitment_title')}</h2>
                 </div>
                 <div className="mb-8 space-y-6 text-lg text-white/95">
                   <p className="text-center">
-                    Với sự hợp tác và tuân thủ nghiêm túc từ Quý Thợ Sửa chữa, chúng ta sẽ cùng nhau
-                    xây dựng EzyFix trở thành nền tảng kết nối dịch vụ uy tín hàng đầu tại Việt Nam.
+                    {t('intro_welcome')}
+                    {' '}
+                    {t('intro_platform')}
                   </p>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     {[
@@ -328,7 +349,7 @@ const RulesTechnicianPage = () => {
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                         ),
-                        text: 'Hỗ trợ phát triển nghề nghiệp',
+                        text: t('commitment_item1'),
                       },
                       {
                         icon: (
@@ -337,7 +358,7 @@ const RulesTechnicianPage = () => {
                             <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
                           </svg>
                         ),
-                        text: 'Tạo cơ hội việc làm ổn định',
+                        text: t('commitment_item2'),
                       },
                       {
                         icon: (
@@ -345,7 +366,7 @@ const RulesTechnicianPage = () => {
                             <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                           </svg>
                         ),
-                        text: 'Bảo vệ quyền lợi thợ sửa chữa',
+                        text: t('commitment_item3'),
                       },
                       {
                         icon: (
@@ -353,7 +374,7 @@ const RulesTechnicianPage = () => {
                             <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                           </svg>
                         ),
-                        text: 'Tăng thu nhập bền vững',
+                        text: t('commitment_item4'),
                       },
                     ].map((item, index) => (
                       <div key={index} className="flex flex-col items-center gap-3 rounded-xl bg-white/10 p-4 text-center backdrop-blur-sm">
@@ -365,10 +386,10 @@ const RulesTechnicianPage = () => {
                 </div>
                 <div className="rounded-xl bg-white/20 p-6 text-center backdrop-blur-sm">
                   <p className="text-xl font-bold text-white">
-                    Trân trọng,
+                    {t('closing_message1')}
                   </p>
                   <p className="mt-2 text-2xl font-bold text-white">
-                    Đội ngũ EzyFix 🔧
+                    {t('closing_message2')}
                   </p>
                 </div>
               </div>

@@ -1,7 +1,9 @@
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const Footer = () => {
+  const t = useTranslations('Footer');
   const currentYear = new Date().getFullYear();
 
   return (
@@ -26,24 +28,23 @@ const Footer = () => {
               </span>
             </div>
             <p className="mb-4 text-gray-400">
-              Kết nối nhanh chóng giữa khách hàng và thợ sửa chữa chuyên nghiệp
-              với công nghệ AI thông minh.
+              {t('description')}
             </p>
             <p className="text-sm text-gray-500">
-              App trên tay - Thợ tới ngay
+              {t('slogan')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="mb-4 text-lg font-bold">Liên kết</h3>
+            <h3 className="mb-4 text-lg font-bold">{t('quicklinks')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="#about"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  Về chúng tôi
+                  {t('about')}
                 </Link>
               </li>
               <li>
@@ -51,7 +52,7 @@ const Footer = () => {
                   href="#customer"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  Khách hàng
+                  {t('customer')}
                 </Link>
               </li>
               <li>
@@ -59,7 +60,7 @@ const Footer = () => {
                   href="#technician"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  Thợ sửa chữa
+                  {t('technician')}
                 </Link>
               </li>
             </ul>
@@ -67,7 +68,7 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="mb-4 text-lg font-bold">Liên hệ</h3>
+            <h3 className="mb-4 text-lg font-bold">{t('contact')}</h3>
             <ul className="space-y-2 text-gray-400">
               <li className="flex items-start gap-2">
                 <svg
@@ -121,7 +122,7 @@ const Footer = () => {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <span>TP. Hồ Chí Minh, Việt Nam</span>
+                <span>{t('location')}</span>
               </li>
             </ul>
           </div>

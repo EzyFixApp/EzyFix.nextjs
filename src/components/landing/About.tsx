@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('AboutSection');
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,20 +45,17 @@ const About = () => {
         >
           {/* Section title */}
           <h2 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">
-            Về
+            {t('title')}
             {' '}
             <span className="bg-gradient-to-r from-[#C3EAFA] to-[#5E9BEF] bg-clip-text text-transparent">
-              EzyFix
+              {t('title_highlight')}
             </span>
           </h2>
           <div className="mx-auto mb-12 h-1 w-24 rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0]" />
 
           {/* Description */}
           <p className="mx-auto mb-12 max-w-3xl text-lg leading-relaxed text-gray-600 md:text-xl">
-            EzyFix là nền tảng kết nối thông minh giữa khách hàng và thợ sửa
-            chữa chuyên nghiệp. Với công nghệ AI tiên tiến, chúng tôi mang đến
-            giải pháp nhanh chóng, tiện lợi và đáng tin cậy cho mọi nhu cầu sửa
-            chữa của bạn.
+            {t('description')}
           </p>
 
           {/* Key features grid */}
@@ -84,11 +83,10 @@ const About = () => {
                 </svg>
               </div>
               <h3 className="mb-3 text-xl font-bold text-gray-900">
-                Nhanh chóng
+                {t('feature1_title')}
               </h3>
               <p className="text-gray-600">
-                Kết nối với thợ sửa chữa chỉ trong vài phút. Không cần chờ đợi
-                lâu.
+                {t('feature1_desc')}
               </p>
             </div>
 
@@ -115,11 +113,10 @@ const About = () => {
                 </svg>
               </div>
               <h3 className="mb-3 text-xl font-bold text-gray-900">
-                Tin cậy
+                {t('feature2_title')}
               </h3>
               <p className="text-gray-600">
-                Thợ được xác thực kỹ lưỡng với đánh giá minh bạch từ khách
-                hàng.
+                {t('feature2_desc')}
               </p>
             </div>
 
@@ -146,10 +143,10 @@ const About = () => {
                 </svg>
               </div>
               <h3 className="mb-3 text-xl font-bold text-gray-900">
-                Minh bạch
+                {t('feature3_title')}
               </h3>
               <p className="text-gray-600">
-                Giá cả rõ ràng, không phát sinh chi phí ẩn. Thanh toán an toàn.
+                {t('feature3_desc')}
               </p>
             </div>
           </div>

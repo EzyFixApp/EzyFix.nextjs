@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 const AISection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('AISection');
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,15 +45,14 @@ const AISection = () => {
             }`}
           >
             <h2 className="mb-6 text-4xl font-extrabold text-gray-900 md:text-5xl">
-              Matching thông minh với
+              {t('title')}
               {' '}
               <span className="bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] bg-clip-text text-transparent">
-                AI tiên tiến
+                {t('title_highlight')}
               </span>
             </h2>
             <p className="mb-8 text-lg leading-relaxed text-gray-600">
-              Hệ thống AI của EzyFix phân tích nhu cầu của bạn và tự động kết
-              nối với thợ sửa chữa phù hợp nhất dựa trên:
+              {t('description')}
             </p>
 
             <div className="space-y-4">
@@ -63,8 +64,8 @@ const AISection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   ),
-                  title: 'Vị trí địa lý',
-                  desc: 'Tìm thợ gần bạn nhất để tiết kiệm thời gian',
+                  title: t('feature1_title'),
+                  desc: t('feature1_desc'),
                 },
                 {
                   icon: (
@@ -72,8 +73,8 @@ const AISection = () => {
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   ),
-                  title: 'Đánh giá & kinh nghiệm',
-                  desc: 'Ưu tiên thợ có rating cao và phù hợp với công việc',
+                  title: t('feature2_title'),
+                  desc: t('feature2_desc'),
                 },
                 {
                   icon: (
@@ -81,8 +82,8 @@ const AISection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ),
-                  title: 'Giá cả phù hợp',
-                  desc: 'Gợi ý mức giá tối ưu dựa trên thị trường',
+                  title: t('feature3_title'),
+                  desc: t('feature3_desc'),
                 },
                 {
                   icon: (
@@ -90,8 +91,8 @@ const AISection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ),
-                  title: 'Chuyên môn phù hợp',
-                  desc: 'Matching với thợ có kỹ năng đúng nhu cầu của bạn',
+                  title: t('feature4_title'),
+                  desc: t('feature4_desc'),
                 },
               ].map(item => (
                 <div
