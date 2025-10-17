@@ -37,7 +37,7 @@ const Hero = () => {
   return (
     <section
       ref={heroRef}
-      className="relative flex min-h-[50vh] items-center justify-center overflow-hidden bg-gradient-to-br from-[#FAFCFF] via-[#B0DAFF] to-[#7AB8EF] pt-16"
+      className="relative flex min-h-[50vh] items-center justify-center overflow-hidden bg-gradient-to-br from-[#FFFFFF] via-[#E0F2FE] to-[#93C5FD] pt-16"
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20">
