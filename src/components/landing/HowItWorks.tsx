@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 const HowItWorks = () => {
+  const t = useTranslations('HowItWorks');
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -32,9 +34,8 @@ const HowItWorks = () => {
   const steps = [
     {
       number: '01',
-      title: 'Đặt dịch vụ',
-      description:
-        'Chọn loại dịch vụ cần sửa chữa, nhập thông tin và gửi yêu cầu qua ứng dụng',
+      title: t('step1_title'),
+      description: t('step1_desc'),
       icon: (
         <svg className="size-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -43,9 +44,8 @@ const HowItWorks = () => {
     },
     {
       number: '02',
-      title: 'Thợ tới sửa',
-      description:
-        'AI tự động kết nối với thợ phù hợp gần bạn nhất. Thợ sẽ liên hệ và đến ngay',
+      title: t('step2_title'),
+      description: t('step2_desc'),
       icon: (
         <svg className="size-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -55,9 +55,8 @@ const HowItWorks = () => {
     },
     {
       number: '03',
-      title: 'Hoàn thành & Thanh toán',
-      description:
-        'Công việc hoàn thành, bạn thanh toán an toàn qua ứng dụng và đánh giá thợ',
+      title: t('step3_title'),
+      description: t('step3_desc'),
       icon: (
         <svg className="size-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -78,14 +77,14 @@ const HowItWorks = () => {
           }`}
         >
           <h2 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">
-            Cách thức
+            {t('title')}
             {' '}
             <span className="bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] bg-clip-text text-transparent">
-              Hoạt động
+              {t('title_highlight')}
             </span>
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Chỉ 3 bước đơn giản để nhận dịch vụ sửa chữa chuyên nghiệp
+            {t('subtitle')}
           </p>
         </div>
 

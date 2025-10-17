@@ -1,12 +1,14 @@
 'use client';
-
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+
 import RotatingEarth from './RotatingEarth';
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('Hero');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -55,17 +57,16 @@ const Hero = () => {
           >
             {/* Main heading */}
             <h1 className="mb-6 text-5xl leading-tight font-extrabold text-gray-800 md:text-6xl lg:text-7xl">
-              App trên tay
+              {t('title_line1')}
               <br />
               <span className="bg-gradient-to-r from-[#F59E0B] to-[#FCD34D] bg-clip-text text-transparent">
-                Thợ tới ngay
+                {t('title_line2')}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="mb-8 text-xl text-gray-700 md:text-2xl">
-              Kết nối nhanh chóng giữa khách hàng và thợ sửa chữa chuyên nghiệp
-              với công nghệ AI thông minh
+              {t('subtitle')}
             </p>
 
             {/* CTA Buttons */}
@@ -99,7 +100,7 @@ const Hero = () => {
                   <path fill="url(#playIconGradient3)" d="M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81Z" />
                   <path fill="url(#playIconGradient4)" d="M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
                 </svg>
-                <span>Tải trên CH Play</span>
+                <span>{t('download_chplay')}</span>
               </a>
 
               <a
@@ -107,7 +108,7 @@ const Hero = () => {
                 onClick={e => handleSmoothScroll(e, '#about')}
                 className="rounded-full border-2 border-gray-700 px-8 py-4 text-center text-lg font-bold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
               >
-                Tìm hiểu thêm
+                {t('learn_more')}
               </a>
             </div>
 
@@ -119,7 +120,7 @@ const Hero = () => {
                 }`}
               >
                 <div className="text-3xl font-bold text-gray-800 lg:text-4xl">10,000+</div>
-                <div className="mt-2 text-sm text-gray-700 lg:text-base">Thợ sửa chữa</div>
+                <div className="mt-2 text-sm text-gray-700 lg:text-base">{t('stats_technicians')}</div>
               </div>
               <div
                 className={`transition-all delay-200 duration-1000 ${
@@ -127,7 +128,7 @@ const Hero = () => {
                 }`}
               >
                 <div className="text-3xl font-bold text-gray-800 lg:text-4xl">50,000+</div>
-                <div className="mt-2 text-sm text-gray-700 lg:text-base">Khách hàng tin dùng</div>
+                <div className="mt-2 text-sm text-gray-700 lg:text-base">{t('stats_customers')}</div>
               </div>
               <div
                 className={`transition-all delay-300 duration-1000 ${
@@ -138,7 +139,7 @@ const Hero = () => {
                   4.8
                   <span className="text-[#F59E0B]"> ★</span>
                 </div>
-                <div className="mt-2 text-sm text-gray-700 lg:text-base">Đánh giá trung bình</div>
+                <div className="mt-2 text-sm text-gray-700 lg:text-base">{t('stats_rating')}</div>
               </div>
             </div>
           </div>

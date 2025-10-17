@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 const Contact = () => {
+  const t = useTranslations('Contact');
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -56,14 +58,14 @@ const Contact = () => {
           }`}
         >
           <h2 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">
-            Liên hệ &
+            {t('title')}
             {' '}
             <span className="bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] bg-clip-text text-transparent">
-              Tải ứng dụng
+              {t('title_highlight')}
             </span>
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Bắt đầu trải nghiệm dịch vụ của EzyFix ngay hôm nay
+            {t('subtitle')}
           </p>
         </div>
 
@@ -75,9 +77,9 @@ const Contact = () => {
             }`}
           >
             <div className="rounded-3xl bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] p-8 text-white md:p-12">
-              <h3 className="mb-4 text-3xl font-bold">Tải ứng dụng EzyFix</h3>
+              <h3 className="mb-4 text-3xl font-bold">{t('download_title')}</h3>
               <p className="mb-8 text-lg opacity-90">
-                Trải nghiệm đầy đủ tính năng trên ứng dụng di động
+                {t('download_desc')}
               </p>
 
               {/* CH Play Button */}
@@ -112,14 +114,14 @@ const Contact = () => {
                   <path fill="url(#playIconGradientContact4)" d="M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
                 </svg>
                 <div className="text-left">
-                  <div className="text-xs">Tải trên</div>
-                  <div className="text-xl font-bold">Google Play</div>
+                  <div className="text-xs">{t('download_button_prefix')}</div>
+                  <div className="text-xl font-bold">{t('download_button')}</div>
                 </div>
               </a>
 
               {/* Features */}
               <div className="mt-8 space-y-4">
-                {['Miễn phí tải về', 'Dễ sử dụng', 'An toàn & bảo mật'].map(feature => (
+                {[t('feature1'), t('feature2'), t('feature3')].map(feature => (
                   <div key={feature} className="flex items-center gap-3">
                     <svg
                       className="size-6 shrink-0"
@@ -149,7 +151,7 @@ const Contact = () => {
           >
             <div className="rounded-3xl bg-white p-8 shadow-xl md:p-12">
               <h3 className="mb-6 text-2xl font-bold text-gray-900">
-                Gửi tin nhắn cho chúng tôi
+                {t('contact_title')}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
@@ -157,7 +159,7 @@ const Contact = () => {
                     htmlFor="name"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    Họ và tên
+                    {t('form_name')}
                   </label>
                   <input
                     type="text"
@@ -174,7 +176,7 @@ const Contact = () => {
                     htmlFor="email"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    Email
+                    {t('form_email')}
                   </label>
                   <input
                     type="email"
@@ -191,7 +193,7 @@ const Contact = () => {
                     htmlFor="phone"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    Số điện thoại
+                    {t('form_phone')}
                   </label>
                   <input
                     type="tel"
@@ -208,7 +210,7 @@ const Contact = () => {
                     htmlFor="message"
                     className="mb-2 block text-sm font-semibold text-gray-700"
                   >
-                    Nội dung
+                    {t('form_message')}
                   </label>
                   <textarea
                     id="message"
@@ -224,7 +226,7 @@ const Contact = () => {
                   type="submit"
                   className="w-full rounded-lg bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] px-6 py-4 font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
                 >
-                  Gửi tin nhắn
+                  {t('form_submit')}
                 </button>
               </form>
             </div>

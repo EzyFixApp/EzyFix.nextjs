@@ -29,7 +29,9 @@ const FloatingButtons = () => {
         href="https://www.facebook.com/profile.php?id=61581405073489"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex size-14 items-center justify-center rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+        className={`group flex size-14 items-center justify-center rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] shadow-lg transition-all duration-500 hover:scale-110 hover:shadow-xl ${
+          showScrollTop ? '' : 'translate-y-[72px]'
+        }`}
         aria-label="Liên hệ Facebook"
       >
         <svg
@@ -42,28 +44,30 @@ const FloatingButtons = () => {
       </a>
 
       {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <button
-          type="button"
-          onClick={scrollToTop}
-          className="group flex size-14 items-center justify-center rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] shadow-lg transition-all hover:scale-110 hover:shadow-xl"
-          aria-label="Cuộn lên đầu trang"
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className={`group flex size-14 items-center justify-center rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] shadow-lg transition-all duration-500 hover:scale-110 hover:shadow-xl ${
+          showScrollTop
+            ? 'translate-y-0 opacity-100'
+            : 'pointer-events-none translate-y-16 opacity-0'
+        }`}
+        aria-label="Cuộn lên đầu trang"
+      >
+        <svg
+          className="size-6 text-white transition-transform duration-300 group-hover:-translate-y-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <svg
-            className="size-6 text-white transition-transform group-hover:-translate-y-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 10l7-7m0 0l7 7m-7-7v18"
-            />
-          </svg>
-        </button>
-      )}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 10l7-7m0 0l7 7m-7-7v18"
+          />
+        </svg>
+      </button>
     </div>
   );
 };

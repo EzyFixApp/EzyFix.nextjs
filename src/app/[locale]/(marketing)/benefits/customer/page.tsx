@@ -1,9 +1,11 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/landing/Navbar';
 
 const BenefitsCustomerDetailPage = () => {
+  const t = useTranslations('BenefitsCustomerPage');
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +34,7 @@ const BenefitsCustomerDetailPage = () => {
 
   const benefits = [
     {
-      category: 'Tiện lợi & Tiết kiệm thời gian',
+      category: t('convenience'),
       icon: (
         <svg className="size-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -41,29 +43,29 @@ const BenefitsCustomerDetailPage = () => {
       color: 'from-blue-500 to-cyan-500',
       items: [
         {
-          title: 'Đặt dịch vụ mọi lúc, mọi nơi',
-          description: 'Chỉ cần vài thao tác trên điện thoại, bạn có thể đặt dịch vụ sửa chữa bất cứ lúc nào trong ngày, không cần gọi điện hay đi tìm thợ.',
-          highlight: '24/7',
+          title: t('convenience_item1_title'),
+          description: t('convenience_item1_desc'),
+          highlight: t('convenience_item1_highlight'),
         },
         {
-          title: 'AI tự động kết nối thợ gần nhất',
-          description: 'Hệ thống AI của EzyFix sẽ tự động tìm và kết nối bạn với thợ sửa chữa gần bạn nhất, tiết kiệm thời gian chờ đợi.',
-          highlight: 'Nhanh chóng',
+          title: t('convenience_item2_title'),
+          description: t('convenience_item2_desc'),
+          highlight: t('convenience_item2_highlight'),
         },
         {
-          title: 'Theo dõi tiến trình real-time',
-          description: 'Cập nhật trạng thái công việc theo thời gian thực: thợ đang trên đường, đang sửa, hay đã hoàn thành.',
-          highlight: 'Minh bạch',
+          title: t('convenience_item3_title'),
+          description: t('convenience_item3_desc'),
+          highlight: t('convenience_item3_highlight'),
         },
         {
-          title: 'Lịch sử dịch vụ đầy đủ',
-          description: 'Mọi đơn dịch vụ đều được lưu trữ, giúp bạn dễ dàng tra cứu và đặt lại dịch vụ khi cần.',
-          highlight: 'Quản lý dễ dàng',
+          title: t('convenience_item4_title'),
+          description: t('convenience_item4_desc'),
+          highlight: t('convenience_item4_highlight'),
         },
       ],
     },
     {
-      category: 'An toàn & Uy tín',
+      category: t('safety'),
       icon: (
         <svg className="size-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -72,29 +74,29 @@ const BenefitsCustomerDetailPage = () => {
       color: 'from-green-500 to-emerald-500',
       items: [
         {
-          title: 'Thợ được xác minh danh tính',
-          description: 'Tất cả thợ sửa chữa trên EzyFix đều được xác thực danh tính qua CCCD và kiểm tra lý lịch cẩn thận.',
-          highlight: 'eKYC',
+          title: t('safety_item1_title'),
+          description: t('safety_item1_desc'),
+          highlight: t('safety_item1_highlight'),
         },
         {
-          title: 'Đánh giá & Review minh bạch',
-          description: 'Xem đánh giá thực tế từ khách hàng khác trước khi quyết định chọn thợ. Rating và review không thể giả mạo.',
-          highlight: '⭐ Tin cậy',
+          title: t('safety_item2_title'),
+          description: t('safety_item2_desc'),
+          highlight: t('safety_item2_highlight'),
         },
         {
-          title: 'Bảo hiểm & Cam kết chất lượng',
-          description: 'EzyFix cam kết hỗ trợ giải quyết nếu có sự cố xảy ra trong quá trình sửa chữa hoặc sau khi hoàn thành.',
-          highlight: 'Bảo vệ 100%',
+          title: t('safety_item3_title'),
+          description: t('safety_item3_desc'),
+          highlight: t('safety_item3_highlight'),
         },
         {
-          title: 'Hỗ trợ khách hàng 24/7',
-          description: 'Đội ngũ chăm sóc khách hàng luôn sẵn sàng hỗ trợ qua chat, điện thoại để giải đáp mọi thắc mắc.',
-          highlight: 'Hotline',
+          title: t('safety_item4_title'),
+          description: t('safety_item4_desc'),
+          highlight: t('safety_item4_highlight'),
         },
       ],
     },
     {
-      category: 'Giá cả & Thanh toán',
+      category: t('pricing'),
       icon: (
         <svg className="size-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -103,55 +105,24 @@ const BenefitsCustomerDetailPage = () => {
       color: 'from-purple-500 to-pink-500',
       items: [
         {
-          title: 'Báo giá minh bạch trước khi làm',
-          description: 'Nhận báo giá chi tiết từ thợ trước khi quyết định. Không phát sinh chi phí ẩn.',
-          highlight: 'Rõ ràng',
+          title: t('pricing_item1_title'),
+          description: t('pricing_item1_desc'),
+          highlight: t('pricing_item1_highlight'),
         },
         {
-          title: 'So sánh giá từ nhiều thợ',
-          description: 'Có thể nhận nhiều báo giá từ các thợ khác nhau để chọn mức giá phù hợp nhất với ngân sách.',
-          highlight: 'Tự chọn',
+          title: t('pricing_item2_title'),
+          description: t('pricing_item2_desc'),
+          highlight: t('pricing_item2_highlight'),
         },
         {
-          title: 'Thanh toán đa dạng & an toàn',
-          description: 'Hỗ trợ nhiều phương thức: Tiền mặt, chuyển khoản, ví điện tử (MoMo, ZaloPay), thẻ tín dụng.',
-          highlight: 'Linh hoạt',
+          title: t('pricing_item3_title'),
+          description: t('pricing_item3_desc'),
+          highlight: t('pricing_item3_highlight'),
         },
         {
-          title: 'Ưu đãi & Khuyến mãi thường xuyên',
-          description: 'Nhận voucher giảm giá, cashback và các chương trình khuyến mãi dành riêng cho khách hàng thân thiết.',
-          highlight: 'Tiết kiệm',
-        },
-      ],
-    },
-    {
-      category: 'Chất lượng dịch vụ',
-      icon: (
-        <svg className="size-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      color: 'from-amber-500 to-orange-500',
-      items: [
-        {
-          title: 'Thợ giỏi, có kinh nghiệm',
-          description: 'Thợ trên nền tảng đều phải vượt qua bài kiểm tra nghiệp vụ, đảm bảo có đủ kỹ năng và kinh nghiệm.',
-          highlight: 'Chuyên nghiệp',
-        },
-        {
-          title: 'Dụng cụ & Linh kiện chính hãng',
-          description: 'Thợ cam kết sử dụng dụng cụ chuẩn và linh kiện có nguồn gốc rõ ràng, có bảo hành.',
-          highlight: 'Chất lượng',
-        },
-        {
-          title: 'Bảo hành sau sửa chữa',
-          description: 'Các công việc sửa chữa đều có thời gian bảo hành cụ thể, giúp bạn yên tâm sử dụng.',
-          highlight: 'Bảo hành',
-        },
-        {
-          title: 'Quyền khiếu nại & Hoàn tiền',
-          description: 'Nếu không hài lòng với chất lượng, bạn có quyền khiếu nại và được hỗ trợ hoàn tiền theo chính sách.',
-          highlight: 'Cam kết',
+          title: t('pricing_item4_title'),
+          description: t('pricing_item4_desc'),
+          highlight: t('pricing_item4_highlight'),
         },
       ],
     },
@@ -167,12 +138,12 @@ const BenefitsCustomerDetailPage = () => {
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="mb-4 text-4xl font-extrabold md:text-5xl lg:text-6xl">
-                Quyền lợi Khách hàng
+                {t('title')}
                 <br />
-                <span className="text-white/90">khi sử dụng EzyFix</span>
+                <span className="text-white/90">EzyFix</span>
               </h1>
               <p className="mx-auto max-w-3xl text-lg text-white/90 md:text-xl">
-                Trải nghiệm dịch vụ sửa chữa tiện lợi, an toàn và chất lượng cao
+                {t('subtitle')}
               </p>
             </div>
           </div>
@@ -237,10 +208,10 @@ const BenefitsCustomerDetailPage = () => {
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] p-12 text-center text-white shadow-2xl">
               <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-                Sẵn sàng trải nghiệm?
+                {t('cta_title')}
               </h2>
               <p className="mb-8 text-lg text-white/90">
-                Tải ứng dụng EzyFix ngay hôm nay và tận hưởng tất cả quyền lợi trên!
+                {t('cta_subtitle')}
               </p>
               {/* CH Play Button */}
               <a

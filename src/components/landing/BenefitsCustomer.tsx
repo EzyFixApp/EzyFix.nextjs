@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 const BenefitsCustomer = () => {
+  const t = useTranslations('BenefitsCustomer');
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -54,8 +56,8 @@ const BenefitsCustomer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
-      title: 'Tìm thợ nhanh chóng',
-      description: 'Chỉ vài phút để kết nối với thợ phù hợp gần bạn nhất',
+      title: t('benefit1_title'),
+      description: t('benefit1_desc'),
     },
     {
       icon: (
@@ -63,8 +65,8 @@ const BenefitsCustomer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       ),
-      title: 'Chất lượng đảm bảo',
-      description: 'Thợ được xác thực kỹ với chứng chỉ và kinh nghiệm rõ ràng',
+      title: t('benefit2_title'),
+      description: t('benefit2_desc'),
     },
     {
       icon: (
@@ -72,8 +74,8 @@ const BenefitsCustomer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      title: 'Giá cả minh bạch',
-      description: 'Báo giá trước khi làm, không phát sinh chi phí ẩn',
+      title: t('benefit3_title'),
+      description: t('benefit3_desc'),
     },
     {
       icon: (
@@ -81,8 +83,8 @@ const BenefitsCustomer = () => {
           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
         </svg>
       ),
-      title: 'Đánh giá công khai',
-      description: 'Xem review thật từ khách hàng khác trước khi quyết định',
+      title: t('benefit4_title'),
+      description: t('benefit4_desc'),
     },
     {
       icon: (
@@ -90,8 +92,8 @@ const BenefitsCustomer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       ),
-      title: 'Thanh toán an toàn',
-      description: 'Nhiều hình thức thanh toán, bảo mật tuyệt đối',
+      title: t('benefit5_title'),
+      description: t('benefit5_desc'),
     },
     {
       icon: (
@@ -99,8 +101,8 @@ const BenefitsCustomer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
         </svg>
       ),
-      title: 'Hỗ trợ tận tâm',
-      description: 'Đội ngũ chăm sóc khách hàng 24/7 luôn sẵn sàng',
+      title: t('benefit6_title'),
+      description: t('benefit6_desc'),
     },
   ];
 
@@ -117,14 +119,14 @@ const BenefitsCustomer = () => {
           }`}
         >
           <h2 className="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">
-            Quyền lợi dành cho
+            {t('title')}
             {' '}
             <span className="bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] bg-clip-text text-transparent">
-              Khách hàng
+              {t('title_highlight')}
             </span>
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
-            Trải nghiệm dịch vụ sửa chữa chuyên nghiệp, nhanh chóng và đáng tin cậy
+            {t('subtitle')}
           </p>
         </div>
 
@@ -156,7 +158,7 @@ const BenefitsCustomer = () => {
             onClick={e => handleSmoothScroll(e, '#contact')}
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
           >
-            <span>Đặt dịch vụ ngay</span>
+            <span>{t('cta_button')}</span>
             <svg
               className="size-5"
               fill="none"
