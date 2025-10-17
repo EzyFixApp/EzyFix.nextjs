@@ -83,13 +83,16 @@ const Navbar = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center transition-transform hover:scale-105">
             <Image
-              src="/assets/images/logo/EzyfixBiglogo.jpg"
+              src="/assets/images/logo/ezyfix-icon.png"
               alt="EzyFix Logo"
               width={200}
               height={65}
-              className="h-16 w-auto"
+              className="relative top-1 h-16 w-auto"
               priority
             />
+            <span className="bg-gradient-to-r from-[#C3EAFA] to-[#5E9BEF] bg-clip-text text-2xl font-bold text-transparent">
+              EzyFix
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
