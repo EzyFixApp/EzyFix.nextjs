@@ -63,11 +63,12 @@ const Navbar = () => {
     };
   }, []);
 
-  // Close dropdowns when clicking outside
+  // Close dropdowns when clicking outside (desktop only)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest('.dropdown-container')) {
+      // Only apply to desktop (when mobile menu is closed)
+      if (!isMobileMenuOpen && !target.closest('.dropdown-container')) {
         setOpenDropdown(null);
         setIsLangDropdownOpen(false);
       }
@@ -75,7 +76,7 @@ const Navbar = () => {
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [isMobileMenuOpen]);
 
   const navLinks = [
     {
@@ -139,10 +140,10 @@ const Navbar = () => {
               alt="EzyFix Logo"
               width={200}
               height={65}
-              className="relative top-1 h-16 w-auto"
+              className="relative top-1 h-12 w-auto md:h-16"
               priority
             />
-            <span className="bg-gradient-to-r from-[#C3EAFA] to-[#5E9BEF] bg-clip-text text-2xl font-bold text-transparent">
+            <span className="bg-gradient-to-r from-[#C3EAFA] to-[#5E9BEF] bg-clip-text text-xl font-bold text-transparent md:text-2xl">
               EzyFix
             </span>
           </Link>
@@ -336,8 +337,8 @@ const Navbar = () => {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="border-t border-gray-200 pt-4 pb-4 md:hidden">
-            <div className="space-y-3">
+          <div className="absolute top-full right-0 left-0 border-t border-gray-200 bg-white shadow-lg md:hidden">
+            <div className="space-y-3 px-2 pt-4 pb-4">
               {navLinks.map(link => (
                 <div key={link.href}>
                   {link.hasDropdown
@@ -346,7 +347,7 @@ const Navbar = () => {
                           <button
                             type="button"
                             onClick={() => toggleDropdown(link.label)}
-                            className="flex w-full items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#609CEF]"
+                            className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#609CEF]"
                           >
                             {link.label}
                             <svg
@@ -361,7 +362,7 @@ const Navbar = () => {
                             </svg>
                           </button>
                           {openDropdown === link.label && link.submenu && (
-                            <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-4">
+                            <div className="animate-fade-in mt-2 ml-4 space-y-1 border-l-2 border-blue-200 pl-4">
                               {link.submenu.map(subItem => (
                                 subItem.isPage
                                   ? (
@@ -372,7 +373,7 @@ const Navbar = () => {
                                           setIsMobileMenuOpen(false);
                                           setOpenDropdown(null);
                                         }}
-                                        className="block py-2 text-sm text-gray-600 hover:text-[#609CEF]"
+                                        className="block py-2 text-sm text-gray-600 transition-colors hover:text-[#609CEF]"
                                       >
                                         {subItem.label}
                                       </Link>
@@ -382,7 +383,7 @@ const Navbar = () => {
                                         key={subItem.href}
                                         href={subItem.href}
                                         onClick={e => handleSmoothScroll(e, subItem.href)}
-                                        className="block py-2 text-sm text-gray-600 hover:text-[#609CEF]"
+                                        className="block py-2 text-sm text-gray-600 transition-colors hover:text-[#609CEF]"
                                       >
                                         {subItem.label}
                                       </a>
@@ -396,7 +397,7 @@ const Navbar = () => {
                         <a
                           href={link.href}
                           onClick={e => handleSmoothScroll(e, link.href)}
-                          className="block cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#609CEF]"
+                          className="block cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#609CEF]"
                         >
                           {link.label}
                         </a>
@@ -407,17 +408,17 @@ const Navbar = () => {
                 href="https://play.google.com/store"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mx-4 block rounded-lg bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] px-4 py-2 text-center text-sm font-semibold text-white"
+                className="mx-4 mt-2 block rounded-lg bg-gradient-to-r from-[#609CEF] to-[#3D7CE0] px-4 py-2 text-center text-sm font-semibold text-white shadow-md transition-shadow hover:shadow-lg"
               >
                 {t('download_app')}
               </a>
 
               {/* Mobile Language Selector */}
-              <div>
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                  className="flex w-full items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#609CEF]"
+                  className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#609CEF]"
                 >
                   <div className="flex items-center space-x-2">
                     <span className="text-2xl">{localeFlags[locale]}</span>
@@ -435,7 +436,7 @@ const Navbar = () => {
                   </svg>
                 </button>
                 {isLangDropdownOpen && (
-                  <div className="ml-4 space-y-1 border-l-2 border-gray-200 pl-4">
+                  <div className="animate-fade-in mt-2 ml-4 space-y-1 border-l-2 border-blue-200 pl-4">
                     {routing.locales.map(lang => (
                       <button
                         key={lang}

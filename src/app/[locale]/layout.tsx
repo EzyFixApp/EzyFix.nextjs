@@ -50,8 +50,8 @@ export default async function RootLayout(props: {
   setRequestLocale(locale);
 
   return (
-    <html lang={locale}>
-      <body>
+    <html lang={locale} className="overflow-x-hidden">
+      <body className="overflow-x-hidden">
         <TopLoader />
         <FloatingButtons />
         <NextIntlClientProvider>

@@ -2,6 +2,14 @@
 
 @import 'tailwindcss';
 
+/* Prevent horizontal scroll */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
 /* Custom animations for landing page */
 @keyframes fadeIn {
   from {

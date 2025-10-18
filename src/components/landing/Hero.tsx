@@ -156,7 +156,7 @@ const Hero = () => {
             </div>
 
             {/* Phone with offset positioning */}
-            <div className="relative -mb-4 -ml-16 lg:-mb-17 lg:-ml-32">
+            <div className="relative -mb-16 -ml-16 md:-mb-4 lg:-mb-17 lg:-ml-32">
               <Image
                 src="/assets/images/showphone.png"
                 alt="EzyFix App"

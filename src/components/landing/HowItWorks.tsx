@@ -165,31 +165,40 @@ const HowItWorks = () => {
 
         {/* Mobile view - vertical */}
         <div className="md:hidden">
-          <div className="space-y-8">
+          <div className="space-y-12">
             {steps.map((step, index) => (
               <div
                 key={step.number}
-                className={`flex gap-6 transition-all duration-700 ${
-                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                className={`transition-all duration-700 ${
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                 }`}
                 style={{ transitionDelay: `${index * 200}ms` }}
               >
-                {/* Number circle */}
-                <div className="flex size-24 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] shadow-lg">
-                  <div className="text-center">
-                    <div className="mb-1 flex justify-center">{step.icon}</div>
-                    <div className="text-lg font-bold text-white">
-                      {step.number}
+                {/* Number circle - centered */}
+                <div className="mb-6 flex justify-center">
+                  <div className="flex size-28 items-center justify-center rounded-full bg-gradient-to-br from-[#609CEF] to-[#3D7CE0] shadow-xl">
+                    <div className="text-center">
+                      <div className="mb-2 flex scale-90 justify-center">{step.icon}</div>
+                      <div className="text-xl font-bold text-white">
+                        {step.number}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 pt-2">
-                  <h3 className="mb-2 text-xl font-bold text-gray-900">
+                {/* Content - centered */}
+                <div className="text-center">
+                  <h3 className="mb-3 text-2xl font-bold text-gray-900">
                     {step.title}
                   </h3>
-                  <p className="text-gray-600">{step.description}</p>
+                  <p className="mx-auto max-w-md text-base leading-relaxed text-gray-600">
+                    {step.description}
+                  </p>
+
+                  {/* Divider line except for last item */}
+                  {index < steps.length - 1 && (
+                    <div className="mx-auto mt-8 h-12 w-1 rounded-full bg-gradient-to-b from-[#609CEF] to-[#3D7CE0] opacity-30" />
+                  )}
                 </div>
               </div>
             ))}
