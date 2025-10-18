@@ -3,12 +3,12 @@
 import type * as THREE from 'three';
 import { Sphere, useTexture } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Suspense, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 function Earth() {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  // Load Earth texture
+  // Load Earth texture - always call the hook
   const earthTexture = useTexture('/assets/images/earth-texture.jpg');
 
   // Rotate the Earth
@@ -38,11 +38,32 @@ function Fallback() {
 }
 
 export default function RotatingEarth() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Only render on client side to avoid SSR issues
+  useEffect(() => {
+    const mountTimer = setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+
+    return () => clearTimeout(mountTimer);
+  }, []);
+
+  // Don't render anything on server
+  if (!isMounted) {
+    return (
+      <div className="absolute inset-0 -z-20 flex h-full w-full items-center justify-center opacity-80">
+        <div className="size-64 animate-pulse rounded-full bg-blue-200" />
+      </div>
+    );
+  }
+
   return (
     <div className="absolute inset-0 -z-20 h-full w-full opacity-80">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 45 }}
         gl={{ alpha: true, antialias: true }}
+        style={{ background: 'transparent' }}
       >
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 3, 5]} intensity={1.5} />
