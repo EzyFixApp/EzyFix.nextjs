@@ -17,9 +17,13 @@ const baseConfig: NextConfig = {
     buildActivityPosition: 'bottom-right',
   },
   outputFileTracingIncludes: {
-    '/': ['./migrations/**/*'],
+    '/': ['./migrations/**/*', './public/**/*'],
   },
   transpilePackages: ['three'],
+  images: {
+    remotePatterns: [],
+    formats: ['image/avif', 'image/webp'],
+  },
 };
 
 // Initialize the Next-Intl plugin
@@ -47,9 +51,9 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
     // Upload a larger set of source maps for prettier stack traces (increases build time)
     widenClientFileUpload: true,
 
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
+    // Disable component annotation - causes conflicts with React Three Fiber
     reactComponentAnnotation: {
-      enabled: true,
+      enabled: false,
     },
 
     // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.

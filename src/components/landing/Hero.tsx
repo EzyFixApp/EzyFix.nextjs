@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
+import { preloadEarthTexture } from './preloadTextures';
 import RotatingEarthWrapper from './RotatingEarthWrapper';
 
 const Hero = () => {
@@ -11,6 +12,9 @@ const Hero = () => {
   const t = useTranslations('Hero');
 
   useEffect(() => {
+    // Preload texture first
+    preloadEarthTexture();
+
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 100);
