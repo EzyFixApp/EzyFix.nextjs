@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
-import RotatingEarth from './RotatingEarth';
+import RotatingEarthWrapper from './RotatingEarthWrapper';
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -152,7 +152,7 @@ const Hero = () => {
           >
             {/* 3D Rotating Earth - independent position */}
             <div className="absolute inset-0 -z-20 ml-16 flex items-center justify-center lg:ml-24">
-              <RotatingEarth />
+              <RotatingEarthWrapper />
             </div>
 
             {/* Phone with offset positioning */}

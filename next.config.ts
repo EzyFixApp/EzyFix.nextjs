@@ -19,6 +19,7 @@ const baseConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/': ['./migrations/**/*'],
   },
+  transpilePackages: ['three'],
 };
 
 // Initialize the Next-Intl plugin
