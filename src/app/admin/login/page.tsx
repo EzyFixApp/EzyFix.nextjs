@@ -7,20 +7,14 @@
 
 import { AlertCircle, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 import { useAuth } from '@/hooks/useAuth';
 
-export default function AdminLoginPage() {
-  const router = useRouter();
+// Component to handle URL error params with Suspense boundary
+function ErrorHandler() {
   const searchParams = useSearchParams();
-  const { login, isLoading, error: authError } = useAuth();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
 
   // Check for error in URL (e.g., insufficient permissions)
   const urlError = searchParams.get('error');
@@ -37,6 +31,18 @@ export default function AdminLoginPage() {
       });
     }
   }, [permissionError]);
+
+  return null;
+}
+
+function AdminLoginForm() {
+  const router = useRouter();
+  const { login, isLoading, error: authError } = useAuth();
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,5 +171,17 @@ export default function AdminLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function AdminLoginPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <ErrorHandler />
+      </Suspense>
+      <AdminLoginForm />
+    </>
   );
 }
