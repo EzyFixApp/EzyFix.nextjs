@@ -38,6 +38,11 @@ export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
+  // Skip i18n for admin and support routes
+  if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/support')) {
+    return NextResponse.next();
+  }
+
   // Verify the request with Arcjet
   // Use `process.env` instead of Env to reduce bundle size in middleware
   if (process.env.ARCJET_KEY) {
@@ -72,8 +77,8 @@ export default async function middleware(
 
 export const config = {
   // Match all pathnames except for
-  // - … if they start with `/_next`, `/_vercel` or `monitoring`
+  // - … if they start with `/_next`, `/_vercel`, `monitoring`, `admin` or `support`
   // - … the ones containing a dot (e.g. `favicon.ico`)
-  matcher: '/((?!_next|_vercel|monitoring|.*\\..*).*)',
+  matcher: '/((?!_next|_vercel|monitoring|admin|support|.*\\..*).*)',
   runtime: 'nodejs',
 };
