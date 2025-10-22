@@ -41,7 +41,9 @@
     "@sentry/nextjs": "^10.17.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@types/nprogress": "^0.2.3",
+    "axios": "^1.12.2",
     "drizzle-orm": "^0.44.5",
+    "lucide-react": "^0.546.0",
     "next": "^15.5.4",
     "next-intl": "^4.3.9",
     "next-nprogress-bar": "^2.4.7",
@@ -51,6 +53,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.63.0",
+    "recharts": "^3.3.0",
+    "sonner": "^2.0.7",
     "three": "^0.180.0",
     "zod": "^4.1.11"
   },
