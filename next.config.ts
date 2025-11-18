@@ -51,7 +51,6 @@ const baseConfig: NextConfig = {
         hostname: 'via.placeholder.com',
       },
     ],
-    remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },
 };
