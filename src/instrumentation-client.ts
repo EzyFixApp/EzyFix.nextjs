@@ -37,6 +37,33 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
+
+    // Ignore Three.js and R3F related errors
+    ignoreErrors: [
+      'R3F:',
+      'THREE.',
+      'WebGLRenderer',
+      'data-sentry-source-file',
+      'sentry-source-file',
+    ],
+
+    // Filter out Three.js errors before sending
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+      const errorMessage = typeof error === 'string' ? error : error?.toString() || '';
+
+      // Don't send Three.js/R3F related errors
+      if (
+        errorMessage.includes('R3F:')
+        || errorMessage.includes('THREE.')
+        || errorMessage.includes('WebGL')
+        || errorMessage.includes('sentry-source-file')
+      ) {
+        return null;
+      }
+
+      return event;
+    },
   });
 }
 
