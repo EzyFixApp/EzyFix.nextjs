@@ -31,6 +31,7 @@ export default antfu(
       'migrations/**/*',
       '**/*.md',
       'docs/**/*',
+      'ezyfixapi.yaml',
     ],
   },
   // --- Accessibility Rules ---

@@ -37,7 +37,24 @@ class ServiceService {
       );
 
       if (response.data.is_success && response.data.data) {
-        return response.data.data;
+        // Debug: Log raw response from backend
+        // eslint-disable-next-line no-console
+        console.log('🔍 GET All Services - Raw Response:', JSON.stringify(response.data.data, null, 2));
+
+        // Map backend response to frontend format
+        // Backend might return 'serviceId' instead of 'id'
+        const services = response.data.data.map((service: any) => ({
+          id: service.id || service.serviceId,
+          categoryId: service.categoryId,
+          serviceName: service.serviceName,
+          description: service.description,
+          serviceIconUrl: service.serviceIconUrl,
+          basePrice: service.basePrice,
+          isActive: service.isActive,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+        }));
+        return services;
       }
 
       return [];
@@ -57,6 +74,9 @@ class ServiceService {
       );
 
       if (response.data.is_success && response.data.data) {
+        // Debug: Log raw response from backend
+        // eslint-disable-next-line no-console
+        console.log('🔍 GET Service By ID - Raw Response:', JSON.stringify(response.data.data, null, 2));
         return response.data.data;
       }
 
@@ -97,7 +117,23 @@ class ServiceService {
       );
 
       if (response.data.is_success && response.data.data) {
-        return response.data.data;
+        // Debug: Log raw response from backend
+        // eslint-disable-next-line no-console
+        console.log('🔍 CREATE Service - Raw Response:', JSON.stringify(response.data.data, null, 2));
+
+        // Map backend response to frontend format
+        const service = response.data.data as any;
+        return {
+          id: service.id || service.serviceId,
+          categoryId: service.categoryId,
+          serviceName: service.serviceName,
+          description: service.description,
+          serviceIconUrl: service.serviceIconUrl,
+          basePrice: service.basePrice,
+          isActive: service.isActive ?? true,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+        };
       }
 
       throw new Error(response.data.message || 'Failed to create service');
@@ -116,6 +152,11 @@ class ServiceService {
     serviceData: UpdateServiceRequest,
   ): Promise<ServiceResponse> {
     try {
+      // Validate ID
+      if (!id || id === 'undefined') {
+        throw new Error('Invalid service ID');
+      }
+
       const formData = new FormData();
 
       if (serviceData.categoryId) {
@@ -130,9 +171,10 @@ class ServiceService {
       if (serviceData.basePrice !== undefined) {
         formData.append('BasePrice', serviceData.basePrice.toString());
       }
-      if (serviceData.isActive !== undefined) {
-        formData.append('IsActive', serviceData.isActive.toString());
-      }
+      // Note: IsActive is not supported in the update endpoint according to API spec
+      // if (serviceData.isActive !== undefined) {
+      //   formData.append('IsActive', serviceData.isActive.toString());
+      // }
       if (serviceData.serviceIconUrl instanceof File) {
         formData.append('ServiceIconUrl', serviceData.serviceIconUrl);
       }
@@ -148,7 +190,23 @@ class ServiceService {
       );
 
       if (response.data.is_success && response.data.data) {
-        return response.data.data;
+        // Debug: Log raw response from backend
+        // eslint-disable-next-line no-console
+        console.log('🔍 UPDATE Service - Raw Response:', JSON.stringify(response.data.data, null, 2));
+
+        // Map backend response to ensure consistent field names
+        const service = response.data.data as any;
+        return {
+          id: service.id || service.serviceId,
+          categoryId: service.categoryId,
+          serviceName: service.serviceName,
+          description: service.description,
+          serviceIconUrl: service.serviceIconUrl,
+          basePrice: service.basePrice,
+          isActive: service.isActive,
+          createdAt: service.createdAt,
+          updatedAt: service.updatedAt,
+        };
       }
 
       throw new Error(response.data.message || 'Failed to update service');

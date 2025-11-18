@@ -86,6 +86,25 @@ apiClient.interceptors.request.use(
 // ========================================
 // Response Interceptor
 // ========================================
+
+// Track if we're currently refreshing token
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: Error | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  failedQueue = [];
+};
+
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     // Log response in development
@@ -102,6 +121,8 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError<ApiResponse>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
     // Log error in development
     if (ENABLE_LOGGING && process.env.NODE_ENV === 'development') {
       console.error('❌ API Error:', {
@@ -117,21 +138,97 @@ apiClient.interceptors.response.use(
     if (error.response) {
       const { status } = error.response;
 
-      // Handle 401 Unauthorized - Token expired or invalid
-      // BUT: Don't redirect if we're already on a login page or if this is a login request
-      if (status === 401) {
+      // Handle 401 Unauthorized - Try to refresh token first
+      if (status === 401 && originalRequest && !originalRequest._retry) {
         if (typeof window !== 'undefined') {
           const pathname = window.location.pathname || '';
           const isLoginPage = pathname.includes('/login');
-          const isLoginRequest = error.config?.url?.includes('/auth/login');
+          const isLoginRequest = originalRequest.url?.includes('/auth/login');
+          const isRefreshRequest = originalRequest.url?.includes('/auth/refresh-token');
 
-          // Only redirect if not on login page and not a login request
-          if (!isLoginPage && !isLoginRequest) {
-            // Clear token
+          // Don't retry for login or refresh requests
+          if (isLoginRequest || isRefreshRequest) {
+            return Promise.reject(error);
+          }
+
+          // Don't try to refresh if already on login page
+          if (isLoginPage) {
+            return Promise.reject(error);
+          }
+
+          // Try to refresh token
+          const refreshToken = localStorage.getItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
+
+          if (refreshToken) {
+            if (isRefreshing) {
+              // If already refreshing, queue this request
+              return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+              })
+                .then(() => {
+                  // Retry original request with new token
+                  return apiClient(originalRequest);
+                })
+                .catch((err) => {
+                  return Promise.reject(err);
+                });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+              // Try to refresh token
+              const response = await apiClient.post<ApiResponse>('/auth/refresh-token', {
+                refreshToken,
+              });
+
+              if (response.data.is_success && response.data.data) {
+                const newAccessToken = (response.data.data as any).accessToken;
+                const newRefreshToken = (response.data.data as any).refreshToken;
+
+                if (newAccessToken) {
+                  localStorage.setItem(TOKEN_KEY, newAccessToken);
+                  // Update authorization header
+                  if (originalRequest.headers) {
+                    originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                  }
+                }
+
+                if (newRefreshToken) {
+                  localStorage.setItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token', newRefreshToken);
+                }
+
+                processQueue(null);
+                isRefreshing = false;
+
+                // Retry original request
+                return apiClient(originalRequest);
+              }
+            } catch (refreshError) {
+              processQueue(new Error('Token refresh failed'));
+              isRefreshing = false;
+
+              // Clear tokens and redirect
+              localStorage.removeItem(TOKEN_KEY);
+              localStorage.removeItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
+              localStorage.removeItem('ezyfix_user_data');
+
+              // Portal-aware redirect
+              if (pathname.startsWith('/support')) {
+                window.location.href = '/support/login';
+              } else {
+                window.location.href = '/admin/login';
+              }
+
+              return Promise.reject(refreshError);
+            }
+          } else {
+            // No refresh token, redirect to login
             localStorage.removeItem(TOKEN_KEY);
-            localStorage.removeItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
+            localStorage.removeItem('ezyfix_user_data');
 
-            // Portal-aware redirect: if user is on /support routes redirect to support login
+            // Portal-aware redirect
             if (pathname.startsWith('/support')) {
               window.location.href = '/support/login';
             } else {

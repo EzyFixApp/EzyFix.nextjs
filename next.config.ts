@@ -20,6 +20,38 @@ const baseConfig: NextConfig = {
     '/': ['./migrations/**/*'],
   },
   transpilePackages: ['three'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.site',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static.vecteezy.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+    ],
+  },
 };
 
 // Initialize the Next-Intl plugin
