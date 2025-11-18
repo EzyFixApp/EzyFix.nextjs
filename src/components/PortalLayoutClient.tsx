@@ -3,9 +3,11 @@
 import {
   AlertTriangle,
   Bell,
+  Calendar,
   ChevronLeft,
   ChevronRight,
   Clock,
+  FileText,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -50,6 +52,16 @@ export default function PortalLayoutClient({ children }: { children: React.React
       title: 'Dịch vụ',
       href: '/admin/services',
       icon: Wrench,
+    },
+    {
+      title: 'Yêu cầu dịch vụ',
+      href: '/admin/service-requests',
+      icon: FileText,
+    },
+    {
+      title: 'Lịch hẹn',
+      href: '/admin/appointments',
+      icon: Calendar,
     },
     {
       title: 'Voucher',
@@ -221,21 +233,10 @@ export default function PortalLayoutClient({ children }: { children: React.React
                 </span>
               </button>
               <div className="flex items-center gap-3">
-                {user?.avatarLink
-                  ? (
-                      <Image
-                        src={user.avatarLink}
-                        alt={user.fullName}
-                        width={32}
-                        height={32}
-                        className="h-8 w-8 rounded-full"
-                      />
-                    )
-                  : (
-                      <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${isSupportPortal ? 'from-orange-500 to-red-500' : 'from-blue-500 to-purple-500'} flex items-center justify-center text-sm font-bold text-white`}>
-                        {user ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'A'}
-                      </div>
-                    )}
+                {/* Temporarily use fallback avatar instead of loading from potentially broken URL */}
+                <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${isSupportPortal ? 'from-orange-500 to-red-500' : 'from-blue-500 to-purple-500'} flex items-center justify-center text-sm font-bold text-white`}>
+                  {user ? user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'A'}
+                </div>
                 <div className="text-sm">
                   <p className="font-medium text-gray-800">
                     {user ? user.fullName : 'Loading...'}

@@ -47,7 +47,13 @@ export function useServices() {
         setIsLoading(true);
         setError(null);
         const newService = await serviceService.createService(serviceData);
-        setServices(prev => [...prev, newService]);
+        // Add to the beginning of the array (newest first)
+        // Add current timestamp as createdAt if not provided by backend
+        const serviceWithTimestamp = {
+          ...newService,
+          createdAt: newService.createdAt || new Date().toISOString(),
+        };
+        setServices(prev => [serviceWithTimestamp, ...prev]);
         toast.success('Service created successfully!');
         return newService;
       } catch (err) {

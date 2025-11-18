@@ -21,6 +21,36 @@ const baseConfig: NextConfig = {
   },
   transpilePackages: ['three'],
   images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.site',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.ezyfix.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static.vecteezy.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+      },
+    ],
     remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },
