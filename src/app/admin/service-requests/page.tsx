@@ -1,6 +1,7 @@
 'use client';
 
 import type {
+  GetServiceRequestsParams,
   ServiceRequest,
   ServiceRequestDetails,
   ServiceRequestStatus,
@@ -12,6 +13,7 @@ import {
   Clock,
   FileText,
   Image as ImageIcon,
+  Loader2,
   MapPin,
   Phone,
   Search,
@@ -21,138 +23,20 @@ import {
   XCircle,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-// Mock data theo đúng structure API từ ServiceRequestManagement.md
-const MOCK_SERVICE_REQUESTS: ServiceRequest[] = [
-  {
-    requestId: '1fa85f64-5717-4562-b3fc-2c963f66afa6',
-    customerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    customerName: 'Nguyễn Văn A',
-    customerPhone: '0901234567',
-    serviceId: '2fa85f64-5717-4562-b3fc-2c963f66afa6',
-    serviceName: 'Sửa điều hòa',
-    fullName: 'Nguyễn Văn A',
-    phoneNumber: '0901234567',
-    requestAddress: '123 Nguyễn Huệ, Q.1, TP.HCM',
-    serviceDescription: 'Điều hòa không lạnh, có tiếng kêu lạ',
-    addressNote: 'Tầng 3, căn 301',
-    requestedDate: '2025-11-15T08:30:00Z',
-    expectedStartTime: '2025-11-16T09:00:00Z',
-    status: 'QUOTED',
-    createdDate: '2025-11-15T08:30:00Z',
-    totalOffers: 3,
-    acceptedOfferId: null,
-    mediaCount: 2,
-  },
-  {
-    requestId: '2fa85f64-5717-4562-b3fc-2c963f66afa7',
-    customerId: '4fa85f64-5717-4562-b3fc-2c963f66afa7',
-    customerName: 'Lê Thị B',
-    customerPhone: '0923456789',
-    serviceId: '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-    serviceName: 'Sửa máy giặt',
-    fullName: 'Lê Thị B',
-    phoneNumber: '0923456789',
-    requestAddress: '456 Lê Lợi, Q.1, TP.HCM',
-    serviceDescription: 'Máy giặt không vắt khô, tiếng ồn khi giặt',
-    addressNote: null,
-    requestedDate: '2025-11-16T10:00:00Z',
-    expectedStartTime: '2025-11-17T14:00:00Z',
-    status: 'PENDING',
-    createdDate: '2025-11-16T10:00:00Z',
-    totalOffers: 0,
-    acceptedOfferId: null,
-    mediaCount: 1,
-  },
-  {
-    requestId: '3fa85f64-5717-4562-b3fc-2c963f66afa8',
-    customerId: '5fa85f64-5717-4562-b3fc-2c963f66afa8',
-    customerName: 'Trần Văn C',
-    customerPhone: '0934567890',
-    serviceId: '4fa85f64-5717-4562-b3fc-2c963f66afa8',
-    serviceName: 'Sửa tủ lạnh',
-    fullName: 'Trần Văn C',
-    phoneNumber: '0934567890',
-    requestAddress: '789 Hai Bà Trưng, Q.3, TP.HCM',
-    serviceDescription: 'Tủ lạnh không đông đá, ngăn mát chạy bình thường',
-    addressNote: 'Căn hộ B5-12, gọi trước 30 phút',
-    requestedDate: '2025-11-14T15:20:00Z',
-    expectedStartTime: '2025-11-15T10:00:00Z',
-    status: 'QUOTE_ACCEPTED',
-    createdDate: '2025-11-14T15:20:00Z',
-    totalOffers: 5,
-    acceptedOfferId: '6fa85f64-5717-4562-b3fc-2c963f66afa9',
-    mediaCount: 3,
-  },
-  {
-    requestId: '4fa85f64-5717-4562-b3fc-2c963f66afa9',
-    customerId: '6fa85f64-5717-4562-b3fc-2c963f66afa9',
-    customerName: 'Phạm Thị D',
-    customerPhone: '0945678901',
-    serviceId: '5fa85f64-5717-4562-b3fc-2c963f66afa9',
-    serviceName: 'Sửa bình nóng lạnh',
-    fullName: 'Phạm Thị D',
-    phoneNumber: '0945678901',
-    requestAddress: '321 Võ Văn Tần, Q.3, TP.HCM',
-    serviceDescription: 'Bình nóng lạnh không nóng, có mùi khét',
-    addressNote: 'Tầng 5, thang máy hỏng',
-    requestedDate: '2025-11-13T09:00:00Z',
-    expectedStartTime: '2025-11-14T08:00:00Z',
-    status: 'COMPLETED',
-    createdDate: '2025-11-13T09:00:00Z',
-    totalOffers: 2,
-    acceptedOfferId: '7fa85f64-5717-4562-b3fc-2c963f66afa10',
-    mediaCount: 4,
-  },
-  {
-    requestId: '5fa85f64-5717-4562-b3fc-2c963f66afa10',
-    customerId: '7fa85f64-5717-4562-b3fc-2c963f66afa10',
-    customerName: 'Hoàng Văn E',
-    customerPhone: '0956789012',
-    serviceId: '6fa85f64-5717-4562-b3fc-2c963f66afa10',
-    serviceName: 'Sửa quạt điều hòa',
-    fullName: 'Hoàng Văn E',
-    phoneNumber: '0956789012',
-    requestAddress: '654 Nguyễn Thị Minh Khai, Q.1, TP.HCM',
-    serviceDescription: 'Quạt không quay, đèn báo sáng bình thường',
-    addressNote: null,
-    requestedDate: '2025-11-12T14:30:00Z',
-    expectedStartTime: '2025-11-13T16:00:00Z',
-    status: 'CANCELLED',
-    createdDate: '2025-11-12T14:30:00Z',
-    totalOffers: 1,
-    acceptedOfferId: null,
-    mediaCount: 0,
-  },
-  {
-    requestId: '6fa85f64-5717-4562-b3fc-2c963f66afa11',
-    customerId: '8fa85f64-5717-4562-b3fc-2c963f66afa11',
-    customerName: 'Võ Thị F',
-    customerPhone: '0967890123',
-    serviceId: '7fa85f64-5717-4562-b3fc-2c963f66afa11',
-    serviceName: 'Sửa ổ cắm điện',
-    fullName: 'Võ Thị F',
-    phoneNumber: '0967890123',
-    requestAddress: '987 Cách Mạng Tháng 8, Q.10, TP.HCM',
-    serviceDescription: 'Ổ cắm phát ra tiếng kêu lạ, có mùi khét nhẹ',
-    addressNote: 'Nhà riêng, có chó dữ',
-    requestedDate: '2025-11-17T11:00:00Z',
-    expectedStartTime: '2025-11-18T13:00:00Z',
-    status: 'QUOTE_REJECTED',
-    createdDate: '2025-11-17T11:00:00Z',
-    totalOffers: 4,
-    acceptedOfferId: null,
-    mediaCount: 2,
-  },
-];
+import ServiceRequestService from '@/libs/ServiceRequestService';
 
 export default function ServiceRequestsPage() {
   // State
-  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(MOCK_SERVICE_REQUESTS);
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | 'ALL'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [currentPage, _setCurrentPage] = useState(1);
+  const [_totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Modal states
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
@@ -160,190 +44,270 @@ export default function ServiceRequestsPage() {
   const [updateStatusModal, setUpdateStatusModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [requestDetails, setRequestDetails] = useState<ServiceRequestDetails | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Form states
   const [cancelReason, setCancelReason] = useState('');
+  const [cancelReasonError, setCancelReasonError] = useState('');
   const [notifyCustomer, setNotifyCustomer] = useState(true);
   const [notifyTechnicians, setNotifyTechnicians] = useState(true);
-  const [newStatus, setNewStatus] = useState<ServiceRequestStatus>('PENDING');
+  const [newStatus, setNewStatus] = useState<string>('PENDING');
+  const [newStatusError, setNewStatusError] = useState('');
   const [updateReason, setUpdateReason] = useState('');
+  const [updateReasonError, setUpdateReasonError] = useState('');
   const [notifyAffectedParties, setNotifyAffectedParties] = useState(false);
 
-  // Filter and search using useMemo
+  // Fetch service requests from API
+  useEffect(() => {
+    const fetchServiceRequests = async () => {
+      try {
+        setIsLoading(true);
+        const params: GetServiceRequestsParams = {
+          page: currentPage,
+          pageSize: 20,
+        };
+
+        if (statusFilter !== 'ALL') {
+          params.status = statusFilter as any;
+        }
+
+        if (searchTerm.trim()) {
+          params.searchKeyword = searchTerm.trim();
+        }
+
+        const response = await ServiceRequestService.getAllServiceRequests(params);
+
+        console.warn('Service Requests Response:', response.items.map(item => ({
+          id: item.requestId,
+          status: item.status,
+          statusType: typeof item.status,
+        })));
+
+        setServiceRequests(response.items);
+        setTotalPages(response.pagination.totalPages);
+        setTotalItems(response.pagination.totalItems);
+      } catch (error) {
+        console.error('Error fetching service requests:', error);
+        toast.error('Có lỗi xảy ra khi tải dữ liệu');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchServiceRequests();
+  }, [currentPage, statusFilter, searchTerm]);
+
+  // Filter using useMemo
   const filteredRequests = useMemo(() => {
-    let filtered = serviceRequests;
+    return serviceRequests;
+  }, [serviceRequests]);
 
-    // Apply status filter
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(sr => sr.status === statusFilter);
+  // Normalize status to UPPER_SNAKE_CASE format
+  const normalizeStatus = (status: string | null): string | null => {
+    if (!status) {
+      return null;
     }
+    // Convert PascalCase to snake_case first, then uppercase
+    // QuoteAccepted -> Quote_Accepted -> QUOTE_ACCEPTED
+    // Cancelled -> Cancelled -> CANCELLED
+    const snakeCase = status
+      .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2') // XMLParser -> XML_Parser
+      .replace(/([a-z\d])([A-Z])/g, '$1_$2'); // QuoteAccepted -> Quote_Accepted
 
-    // Apply search
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        sr =>
-          sr.customerName.toLowerCase().includes(term)
-          || sr.customerPhone.includes(term)
-          || sr.requestAddress.toLowerCase().includes(term)
-          || sr.serviceName.toLowerCase().includes(term)
-          || sr.requestId.toLowerCase().includes(term),
-      );
-    }
-
-    return filtered;
-  }, [serviceRequests, searchTerm, statusFilter]);
+    const result = snakeCase.toUpperCase();
+    console.warn(`normalizeStatus: "${status}" -> "${snakeCase}" -> "${result}"`);
+    return result;
+  };
 
   // Helper functions
-  const getStatusColor = (status: ServiceRequestStatus): string => {
-    const colors: Record<ServiceRequestStatus, string> = {
-      PENDING: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-      QUOTED: 'bg-blue-50 text-blue-700 border-blue-200',
-      QUOTE_REJECTED: 'bg-red-50 text-red-700 border-red-200',
-      QUOTE_ACCEPTED: 'bg-green-50 text-green-700 border-green-200',
-      COMPLETED: 'bg-green-50 text-green-700 border-green-200',
-      CANCELLED: 'bg-gray-50 text-gray-700 border-gray-200',
-    };
-    return colors[status];
+  const getStatusColor = (status: string | null): string => {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'QUOTED':
+        return 'bg-blue-100 text-blue-800';
+      case 'QUOTE_REJECTED':
+        return 'bg-red-100 text-red-800';
+      case 'QUOTE_ACCEPTED':
+        return 'bg-green-100 text-green-800';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELLED':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const getStatusIcon = (status: ServiceRequestStatus) => {
-    const icons: Record<ServiceRequestStatus, React.ReactNode> = {
-      PENDING: <Clock className="h-5 w-5" />,
-      QUOTED: <FileText className="h-5 w-5" />,
-      QUOTE_REJECTED: <XCircle className="h-5 w-5" />,
-      QUOTE_ACCEPTED: <CheckCircle2 className="h-5 w-5" />,
-      COMPLETED: <CheckCircle2 className="h-5 w-5" />,
-      CANCELLED: <X className="h-5 w-5" />,
-    };
-    return icons[status];
+  const getStatusIcon = (status: string | null) => {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
+      case 'PENDING':
+        return <Clock className="h-5 w-5" />;
+      case 'QUOTED':
+        return <FileText className="h-5 w-5" />;
+      case 'QUOTE_REJECTED':
+        return <XCircle className="h-5 w-5" />;
+      case 'QUOTE_ACCEPTED':
+        return <CheckCircle2 className="h-5 w-5" />;
+      case 'COMPLETED':
+        return <CheckCircle2 className="h-5 w-5" />;
+      case 'CANCELLED':
+        return <X className="h-5 w-5" />;
+      default:
+        return <AlertCircle className="h-5 w-5" />;
+    }
   };
 
-  const getStatusText = (status: ServiceRequestStatus): string => {
-    const texts: Record<ServiceRequestStatus, string> = {
-      PENDING: 'Chờ báo giá',
-      QUOTED: 'Đã báo giá',
-      QUOTE_REJECTED: 'Từ chối',
-      QUOTE_ACCEPTED: 'Đã chấp nhận',
-      COMPLETED: 'Hoàn thành',
-      CANCELLED: 'Đã hủy',
-    };
-    return texts[status];
+  const getStatusText = (status: string | null): string => {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
+      case 'PENDING':
+        return 'Chờ xử lý';
+      case 'QUOTED':
+        return 'Đã báo giá';
+      case 'QUOTE_REJECTED':
+        return 'Từ chối báo giá';
+      case 'QUOTE_ACCEPTED':
+        return 'Chấp nhận báo giá';
+      case 'COMPLETED':
+        return 'Hoàn thành';
+      case 'CANCELLED':
+        return 'Đã hủy';
+      default:
+        return status || 'Không xác định';
+    }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) {
+      return '-';
+    }
+    return new Date(dateString).toLocaleString('vi-VN');
+  };
+
+  // Get valid next statuses based on current status
+  const getValidNextStatuses = (currentStatus: string | null): ServiceRequestStatus[] => {
+    const status = normalizeStatus(currentStatus);
+    console.warn('getValidNextStatuses - Original:', currentStatus, 'Normalized:', status);
+
+    switch (status) {
+      case 'PENDING':
+        // Từ PENDING có thể chuyển sang QUOTED
+        return ['QUOTED'];
+      case 'QUOTED':
+        // Từ QUOTED có thể chuyển sang QUOTE_ACCEPTED hoặc QUOTE_REJECTED
+        return ['QUOTE_ACCEPTED', 'QUOTE_REJECTED'];
+      case 'QUOTE_REJECTED':
+        // Từ QUOTE_REJECTED có thể chuyển sang QUOTED (báo giá lại)
+        return ['QUOTED'];
+      case 'QUOTE_ACCEPTED':
+        // Từ QUOTE_ACCEPTED có thể chuyển sang COMPLETED
+        return ['COMPLETED'];
+      case 'COMPLETED':
+        // COMPLETED là trạng thái cuối, không thể chuyển
+        return [];
+      case 'CANCELLED':
+        // CANCELLED là trạng thái cuối, không thể chuyển
+        return [];
+      default:
+        // Nếu không xác định, cho phép chọn các trạng thái cơ bản (không bao gồm CANCELLED)
+        return ['PENDING', 'QUOTED', 'QUOTE_REJECTED', 'QUOTE_ACCEPTED', 'COMPLETED'];
+    }
   };
 
   // Event handlers
-  const handleViewDetails = (request: ServiceRequest) => {
+  const handleViewDetails = async (request: ServiceRequest) => {
     setSelectedRequest(request);
-
-    // Mock detailed data
-    const mockDetails: ServiceRequestDetails = {
-      requestId: request.requestId,
-      customerId: request.customerId,
-      customer: {
-        userId: request.customerId,
-        email: `${request.customerName.toLowerCase().replace(/\s/g, '')}@email.com`,
-        firstName: request.customerName.split(' ').pop() || '',
-        lastName: request.customerName.split(' ').slice(0, -1).join(' '),
-        phone: request.customerPhone,
-        avatarLink: null,
-        isVerify: true,
-      },
-      serviceId: request.serviceId,
-      service: {
-        serviceId: request.serviceId,
-        serviceName: request.serviceName,
-        categoryName: 'Điện lạnh',
-      },
-      fullName: request.fullName,
-      phoneNumber: request.phoneNumber,
-      requestAddress: request.requestAddress,
-      serviceDescription: request.serviceDescription,
-      addressNote: request.addressNote,
-      requestedDate: request.requestedDate,
-      expectedStartTime: request.expectedStartTime,
-      status: request.status,
-      createdDate: request.createdDate,
-      offers: [
-        {
-          offerId: '4fa85f64-5717-4562-b3fc-2c963f66afa6',
-          technicianId: '5fa85f64-5717-4562-b3fc-2c963f66afa6',
-          technicianName: 'Trần Văn B',
-          technicianPhone: '0912345678',
-          technicianRating: 4.5,
-          estimatedCost: 500000,
-          finalCost: 0,
-          submitDate: '2025-11-15T09:00:00Z',
-          status: 'PENDING',
-          notes: 'Có thể là thiếu gas hoặc lỗi dàn nóng',
-        },
-      ],
-      media: [
-        {
-          mediaId: '7fa85f64-5717-4562-b3fc-2c963f66afa6',
-          url: 'https://via.placeholder.com/400',
-          mediaType: 'INITIAL',
-          uploadedDate: '2025-11-15T08:30:00Z',
-        },
-      ],
-      voucherUsages: [],
-      activityLogs: [
-        {
-          logId: '8fa85f64-5717-4562-b3fc-2c963f66afa6',
-          action: 'CREATED',
-          performedBy: request.customerName,
-          performedAt: request.createdDate,
-          oldValue: null,
-          newValue: 'PENDING',
-        },
-      ],
-    };
-
-    setRequestDetails(mockDetails);
     setViewDetailsModal(true);
+    setIsLoadingDetails(true);
+
+    try {
+      const details = await ServiceRequestService.getServiceRequestById(request.requestId);
+      setRequestDetails(details);
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      toast.error('Có lỗi xảy ra khi tải chi tiết');
+    } finally {
+      setIsLoadingDetails(false);
+    }
   };
 
-  const handleCancelRequest = () => {
+  const handleCancelRequest = async () => {
     if (!selectedRequest) {
       return;
     }
 
+    // Reset errors
+    setCancelReasonError('');
+
+    // Validate
     if (cancelReason.length < 10) {
+      setCancelReasonError('Lý do hủy phải có ít nhất 10 ký tự');
       toast.error('Lý do hủy phải có ít nhất 10 ký tự');
       return;
     }
 
-    // Update status locally
-    setServiceRequests(prev =>
-      prev.map(sr =>
-        sr.requestId === selectedRequest.requestId
-          ? { ...sr, status: 'CANCELLED' as ServiceRequestStatus }
-          : sr,
-      ),
-    );
+    setIsCancelling(true);
+    try {
+      const response = await ServiceRequestService.cancelServiceRequest(
+        selectedRequest.requestId,
+        {
+          reason: cancelReason,
+          notifyCustomer,
+          notifyTechnicians,
+        },
+      );
 
-    toast.success('Đã hủy yêu cầu dịch vụ thành công');
-    setCancelModal(false);
-    setCancelReason('');
-    setNotifyCustomer(true);
-    setNotifyTechnicians(true);
+      console.warn('Cancel response:', response);
+      toast.success('Đã hủy yêu cầu dịch vụ thành công');
+
+      // Refresh list
+      setServiceRequests(prev =>
+        prev.map(sr =>
+          sr.requestId === selectedRequest.requestId
+            ? { ...sr, status: 'CANCELLED' }
+            : sr,
+        ),
+      );
+
+      setCancelModal(false);
+      setCancelReason('');
+      setCancelReasonError('');
+      setNotifyCustomer(true);
+      setNotifyTechnicians(true);
+    } catch (error: any) {
+      console.error('Error cancelling request:', error);
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi hủy yêu cầu';
+      toast.error(errorMessage);
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
-  const handleUpdateStatus = () => {
+  const handleUpdateStatus = async () => {
     if (!selectedRequest) {
       return;
     }
 
+    // Reset errors
+    setNewStatusError('');
+    setUpdateReasonError('');
+
+    // Validate status
+    if (!newStatus || newStatus === '') {
+      setNewStatusError('Vui lòng chọn trạng thái mới');
+      toast.error('Vui lòng chọn trạng thái mới');
+      return;
+    }
+
+    // Validate reason
     if (updateReason.length < 10) {
+      setUpdateReasonError('Lý do cập nhật phải có ít nhất 10 ký tự');
       toast.error('Lý do cập nhật phải có ít nhất 10 ký tự');
       return;
     }
@@ -353,30 +317,66 @@ export default function ServiceRequestsPage() {
       return;
     }
 
-    // Update status locally
-    setServiceRequests(prev =>
-      prev.map(sr =>
-        sr.requestId === selectedRequest.requestId
-          ? { ...sr, status: newStatus }
-          : sr,
-      ),
-    );
+    setIsUpdatingStatus(true);
+    try {
+      const response = await ServiceRequestService.updateServiceRequestStatus(
+        selectedRequest.requestId,
+        {
+          newStatus: newStatus as ServiceRequestStatus,
+          reason: updateReason,
+          notifyAffectedParties,
+        },
+      );
 
-    toast.success(`Đã cập nhật trạng thái thành ${newStatus}`);
-    setUpdateStatusModal(false);
-    setUpdateReason('');
-    setNotifyAffectedParties(false);
+      console.warn('Update status response:', response);
+      toast.success(`Đã cập nhật trạng thái thành ${getStatusText(newStatus)}`);
+
+      // Refresh list
+      setServiceRequests(prev =>
+        prev.map(sr =>
+          sr.requestId === selectedRequest.requestId
+            ? { ...sr, status: newStatus as ServiceRequestStatus }
+            : sr,
+        ),
+      );
+
+      setUpdateStatusModal(false);
+      setUpdateReason('');
+      setUpdateReasonError('');
+      setNewStatusError('');
+      setNotifyAffectedParties(false);
+    } catch (error: any) {
+      console.error('Error updating status:', error);
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi cập nhật trạng thái';
+      toast.error(errorMessage);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
 
   // Calculate stats
+  // Calculate stats
   const stats = {
-    total: serviceRequests.length,
-    pending: serviceRequests.filter(sr => sr.status === 'PENDING').length,
-    quoted: serviceRequests.filter(sr => sr.status === 'QUOTED').length,
-    accepted: serviceRequests.filter(sr => sr.status === 'QUOTE_ACCEPTED').length,
-    completed: serviceRequests.filter(sr => sr.status === 'COMPLETED').length,
-    cancelled: serviceRequests.filter(sr => sr.status === 'CANCELLED').length,
+    total: totalItems,
+    pending: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'PENDING').length,
+    quoted: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'QUOTED').length,
+    accepted: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'QUOTE_ACCEPTED').length,
+    completed: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'COMPLETED').length,
+    cancelled: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'CANCELLED').length,
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+          <p className="text-gray-600">Đang tải danh sách yêu cầu dịch vụ...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -460,7 +460,7 @@ export default function ServiceRequestsPage() {
           {/* Status Filter */}
           <select
             value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value as ServiceRequestStatus | 'ALL')}
+            onChange={e => setStatusFilter(e.target.value)}
             className="rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           >
             <option value="ALL">Tất cả trạng thái</option>
@@ -480,7 +480,7 @@ export default function ServiceRequestsPage() {
           {' '}
           /
           {' '}
-          {serviceRequests.length}
+          {totalItems}
           {' '}
           yêu cầu
         </div>
@@ -539,19 +539,19 @@ export default function ServiceRequestsPage() {
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 flex-shrink-0 text-gray-400" />
                     <span className="truncate font-medium text-gray-900">
-                      {request.customerName}
+                      {request.customerName || 'N/A'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" />
                     <span className="text-sm text-gray-600">
-                      {request.customerPhone}
+                      {request.customerPhone || 'N/A'}
                     </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
                     <p className="line-clamp-2 text-xs text-gray-500">
-                      {request.requestAddress}
+                      {request.requestAddress || 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export default function ServiceRequestsPage() {
                 {/* Description */}
                 <div className="flex flex-col gap-2">
                   <p className="line-clamp-3 text-sm text-gray-700">
-                    {request.serviceDescription}
+                    {request.serviceDescription || 'Chưa có mô tả'}
                   </p>
                   {request.mediaCount > 0 && (
                     <div className="flex items-center gap-1.5">
@@ -608,7 +608,7 @@ export default function ServiceRequestsPage() {
                   </button>
 
                   <div className="grid grid-cols-2 gap-2">
-                    {!['CANCELLED', 'COMPLETED'].includes(request.status)
+                    {!['CANCELLED', 'COMPLETED'].includes(request.status?.toUpperCase() || '')
                       ? (
                           <>
                             <button
@@ -616,7 +616,8 @@ export default function ServiceRequestsPage() {
                               onClick={() => {
                                 setSelectedRequest(request);
                                 setUpdateStatusModal(true);
-                                setNewStatus(request.status);
+                                setNewStatus(''); // Reset to empty so user must choose
+                                setUpdateReason('');
                               }}
                               className="rounded-lg border border-blue-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-blue-600 transition-colors hover:bg-blue-50"
                             >
@@ -647,7 +648,7 @@ export default function ServiceRequestsPage() {
       </div>
 
       {/* View Details Modal */}
-      {viewDetailsModal && requestDetails && (
+      {viewDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white shadow-2xl">
             {/* Modal Header */}
@@ -663,197 +664,208 @@ export default function ServiceRequestsPage() {
             </div>
 
             {/* Modal Content */}
-            <div className="space-y-6 p-6">
-              {/* Basic Info */}
-              <div>
-                <h3 className="mb-3 text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Request ID</div>
-                    <p className="font-mono text-sm text-gray-900">{requestDetails.requestId}</p>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Trạng thái</div>
-                    <div className="mt-1">
-                      <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-sm font-medium ${getStatusColor(requestDetails.status)}`}>
-                        {getStatusIcon(requestDetails.status)}
-                        {getStatusText(requestDetails.status)}
-                      </span>
+            {isLoadingDetails
+              ? (
+                  <div className="flex h-[400px] items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+                      <p className="text-gray-600">Đang tải chi tiết...</p>
                     </div>
                   </div>
+                )
+              : requestDetails && (
+                <div className="space-y-6 p-6">
+                  {/* Basic Info */}
                   <div>
-                    <div className="text-sm font-medium text-gray-600">Dịch vụ</div>
-                    <p className="text-sm text-gray-900">{requestDetails.service.serviceName}</p>
-                    <p className="text-xs text-gray-500">{requestDetails.service.categoryName}</p>
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Request ID</div>
+                        <p className="font-mono text-sm text-gray-900">{requestDetails.requestId}</p>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Trạng thái</div>
+                        <div className="mt-1">
+                          <span className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-sm font-medium ${getStatusColor(requestDetails.status)}`}>
+                            {getStatusIcon(requestDetails.status)}
+                            {getStatusText(requestDetails.status)}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Dịch vụ</div>
+                        <p className="text-sm text-gray-900">{requestDetails.service.serviceName}</p>
+                        <p className="text-xs text-gray-500">{requestDetails.service.categoryName}</p>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Ngày tạo</div>
+                        <p className="text-sm text-gray-900">{formatDate(requestDetails.createdDate)}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Ngày tạo</div>
-                    <p className="text-sm text-gray-900">{formatDate(requestDetails.createdDate)}</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Customer Info */}
-              <div>
-                <h3 className="mb-3 text-lg font-semibold text-gray-900">Thông tin khách hàng</h3>
-                <div className="grid gap-4 md:grid-cols-2">
+                  {/* Customer Info */}
                   <div>
-                    <div className="text-sm font-medium text-gray-600">Họ tên</div>
-                    <p className="text-sm text-gray-900">
-                      {requestDetails.customer.lastName}
-                      {' '}
-                      {requestDetails.customer.firstName}
-                    </p>
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900">Thông tin khách hàng</h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Họ tên</div>
+                        <p className="text-sm text-gray-900">
+                          {requestDetails.customer.lastName}
+                          {' '}
+                          {requestDetails.customer.firstName}
+                        </p>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Email</div>
+                        <p className="text-sm text-gray-900">{requestDetails.customer.email}</p>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Số điện thoại</div>
+                        <p className="text-sm text-gray-900">{requestDetails.phoneNumber}</p>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Trạng thái xác thực</div>
+                        <p className="text-sm text-gray-900">
+                          {requestDetails.customer.isVerify ? '✅ Đã xác thực' : '❌ Chưa xác thực'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Email</div>
-                    <p className="text-sm text-gray-900">{requestDetails.customer.email}</p>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Số điện thoại</div>
-                    <p className="text-sm text-gray-900">{requestDetails.phoneNumber}</p>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Trạng thái xác thực</div>
-                    <p className="text-sm text-gray-900">
-                      {requestDetails.customer.isVerify ? '✅ Đã xác thực' : '❌ Chưa xác thực'}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Service Details */}
-              <div>
-                <h3 className="mb-3 text-lg font-semibold text-gray-900">Chi tiết yêu cầu</h3>
-                <div className="space-y-3">
+                  {/* Service Details */}
                   <div>
-                    <div className="text-sm font-medium text-gray-600">Địa chỉ sửa chữa</div>
-                    <p className="text-sm text-gray-900">{requestDetails.requestAddress}</p>
-                    {requestDetails.addressNote && (
-                      <p className="text-xs text-gray-500">
-                        Ghi chú:
-                        {' '}
-                        {requestDetails.addressNote}
-                      </p>
-                    )}
+                    <h3 className="mb-3 text-lg font-semibold text-gray-900">Chi tiết yêu cầu</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Địa chỉ sửa chữa</div>
+                        <p className="text-sm text-gray-900">{requestDetails.requestAddress}</p>
+                        {requestDetails.addressNote && (
+                          <p className="text-xs text-gray-500">
+                            Ghi chú:
+                            {' '}
+                            {requestDetails.addressNote}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-600">Mô tả vấn đề</div>
+                        <p className="text-sm text-gray-900">{requestDetails.serviceDescription}</p>
+                      </div>
+                      {requestDetails.expectedStartTime && (
+                        <div>
+                          <div className="text-sm font-medium text-gray-600">Thời gian mong muốn</div>
+                          <p className="text-sm text-gray-900">{formatDate(requestDetails.expectedStartTime)}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-600">Mô tả vấn đề</div>
-                    <p className="text-sm text-gray-900">{requestDetails.serviceDescription}</p>
-                  </div>
-                  {requestDetails.expectedStartTime && (
+
+                  {/* Offers */}
+                  {requestDetails.offers.length > 0 && (
                     <div>
-                      <div className="text-sm font-medium text-gray-600">Thời gian mong muốn</div>
-                      <p className="text-sm text-gray-900">{formatDate(requestDetails.expectedStartTime)}</p>
+                      <h3 className="mb-3 text-lg font-semibold text-gray-900">
+                        Báo giá (
+                        {requestDetails.offers.length}
+                        )
+                      </h3>
+                      <div className="space-y-3">
+                        {requestDetails.offers.map(offer => (
+                          <div key={offer.offerId} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div>
+                                <div className="text-sm font-medium text-gray-600">Thợ</div>
+                                <p className="text-sm font-medium text-gray-900">{offer.technicianName}</p>
+                                <p className="text-xs text-gray-500">{offer.technicianPhone}</p>
+                                <p className="text-xs text-yellow-600">
+                                  ⭐
+                                  {' '}
+                                  {offer.technicianRating.toFixed(1)}
+                                </p>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-600">Giá dự kiến</div>
+                                <p className="text-lg font-bold text-blue-600">
+                                  {offer.estimatedCost.toLocaleString('vi-VN')}
+                                  {' '}
+                                  đ
+                                </p>
+                              </div>
+                              <div className="md:col-span-2">
+                                <div className="text-sm font-medium text-gray-600">Ghi chú</div>
+                                <p className="text-sm text-gray-700">{offer.notes || 'Không có ghi chú'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Media */}
+                  {requestDetails.media.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-lg font-semibold text-gray-900">
+                        Hình ảnh/Video (
+                        {requestDetails.media.length}
+                        )
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        {requestDetails.media.map(media => (
+                          <div key={media.mediaId} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
+                            <Image
+                              src={media.url}
+                              alt={media.mediaType}
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute right-0 bottom-0 left-0 bg-black/50 px-2 py-1 text-xs text-white">
+                              {media.mediaType}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Activity Logs */}
+                  {requestDetails.activityLogs.length > 0 && (
+                    <div>
+                      <h3 className="mb-3 text-lg font-semibold text-gray-900">Lịch sử hoạt động</h3>
+                      <div className="space-y-2">
+                        {requestDetails.activityLogs.map(log => (
+                          <div key={log.logId} className="flex items-start gap-3 rounded-lg bg-gray-50 p-3">
+                            <div className="mt-1 rounded-full bg-blue-100 p-1">
+                              <AlertCircle className="h-3 w-3 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">{log.action}</p>
+                              <p className="text-xs text-gray-600">
+                                Bởi:
+                                {' '}
+                                {log.performedBy}
+                                {' '}
+                                -
+                                {' '}
+                                {formatDate(log.performedAt)}
+                              </p>
+                              {log.oldValue && (
+                                <p className="text-xs text-gray-500">
+                                  {log.oldValue}
+                                  {' '}
+                                  →
+                                  {' '}
+                                  {log.newValue}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Offers */}
-              {requestDetails.offers.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-lg font-semibold text-gray-900">
-                    Báo giá (
-                    {requestDetails.offers.length}
-                    )
-                  </h3>
-                  <div className="space-y-3">
-                    {requestDetails.offers.map(offer => (
-                      <div key={offer.offerId} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <div className="text-sm font-medium text-gray-600">Thợ</div>
-                            <p className="text-sm font-medium text-gray-900">{offer.technicianName}</p>
-                            <p className="text-xs text-gray-500">{offer.technicianPhone}</p>
-                            <p className="text-xs text-yellow-600">
-                              ⭐
-                              {' '}
-                              {offer.technicianRating.toFixed(1)}
-                            </p>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-gray-600">Giá dự kiến</div>
-                            <p className="text-lg font-bold text-blue-600">
-                              {offer.estimatedCost.toLocaleString('vi-VN')}
-                              {' '}
-                              đ
-                            </p>
-                          </div>
-                          <div className="md:col-span-2">
-                            <div className="text-sm font-medium text-gray-600">Ghi chú</div>
-                            <p className="text-sm text-gray-700">{offer.notes || 'Không có ghi chú'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
-
-              {/* Media */}
-              {requestDetails.media.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-lg font-semibold text-gray-900">
-                    Hình ảnh/Video (
-                    {requestDetails.media.length}
-                    )
-                  </h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    {requestDetails.media.map(media => (
-                      <div key={media.mediaId} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
-                        <Image
-                          src={media.url}
-                          alt={media.mediaType}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute right-0 bottom-0 left-0 bg-black/50 px-2 py-1 text-xs text-white">
-                          {media.mediaType}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Activity Logs */}
-              {requestDetails.activityLogs.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-lg font-semibold text-gray-900">Lịch sử hoạt động</h3>
-                  <div className="space-y-2">
-                    {requestDetails.activityLogs.map(log => (
-                      <div key={log.logId} className="flex items-start gap-3 rounded-lg bg-gray-50 p-3">
-                        <div className="mt-1 rounded-full bg-blue-100 p-1">
-                          <AlertCircle className="h-3 w-3 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">{log.action}</p>
-                          <p className="text-xs text-gray-600">
-                            Bởi:
-                            {' '}
-                            {log.performedBy}
-                            {' '}
-                            -
-                            {' '}
-                            {formatDate(log.performedAt)}
-                          </p>
-                          {log.oldValue && (
-                            <p className="text-xs text-gray-500">
-                              {log.oldValue}
-                              {' '}
-                              →
-                              {' '}
-                              {log.newValue}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       )}
@@ -885,14 +897,31 @@ export default function ServiceRequestsPage() {
                   id="cancel-reason"
                   rows={4}
                   value={cancelReason}
-                  onChange={e => setCancelReason(e.target.value)}
+                  onChange={(e) => {
+                    setCancelReason(e.target.value);
+                    if (cancelReasonError) {
+                      setCancelReasonError('');
+                    }
+                  }}
                   placeholder="Nhập lý do hủy (tối thiểu 10 ký tự)..."
-                  className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  className={`mt-1 w-full rounded-lg border p-2 text-sm focus:ring-1 focus:outline-none ${
+                    cancelReasonError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  {cancelReason.length}
-                  /10 ký tự
-                </p>
+                {cancelReasonError
+                  ? (
+                      <p className="mt-1 text-xs text-red-600">
+                        {cancelReasonError}
+                      </p>
+                    )
+                  : (
+                      <p className="mt-1 text-xs text-gray-500">
+                        {cancelReason.length}
+                        /10 ký tự
+                      </p>
+                    )}
               </div>
 
               <div className="space-y-2">
@@ -925,15 +954,18 @@ export default function ServiceRequestsPage() {
                   setCancelModal(false);
                   setCancelReason('');
                 }}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                disabled={isCancelling}
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Đóng
               </button>
               <button
                 type="button"
                 onClick={handleCancelRequest}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                disabled={isCancelling}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
+                {isCancelling && <Loader2 className="h-4 w-4 animate-spin" />}
                 Xác nhận hủy
               </button>
             </div>
@@ -965,16 +997,38 @@ export default function ServiceRequestsPage() {
                 <select
                   id="new-status"
                   value={newStatus}
-                  onChange={e => setNewStatus(e.target.value as ServiceRequestStatus)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  onChange={(e) => {
+                    setNewStatus(e.target.value as ServiceRequestStatus);
+                    if (newStatusError) {
+                      setNewStatusError('');
+                    }
+                  }}
+                  className={`mt-1 w-full rounded-lg border px-4 py-2 focus:ring-1 focus:outline-none ${
+                    newStatusError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                 >
-                  <option value="PENDING">PENDING - Chờ báo giá</option>
-                  <option value="QUOTED">QUOTED - Đã báo giá</option>
-                  <option value="QUOTE_REJECTED">QUOTE_REJECTED - Từ chối báo giá</option>
-                  <option value="QUOTE_ACCEPTED">QUOTE_ACCEPTED - Đã chấp nhận</option>
-                  <option value="COMPLETED">COMPLETED - Hoàn thành</option>
-                  <option value="CANCELLED">CANCELLED - Đã hủy</option>
+                  <option value="" disabled>-- Chọn trạng thái --</option>
+                  {getValidNextStatuses(selectedRequest.status).map(status => (
+                    <option key={status} value={status}>
+                      {getStatusText(status)}
+                    </option>
+                  ))}
                 </select>
+                {newStatusError
+                  ? (
+                      <p className="mt-1 text-xs text-red-600">
+                        {newStatusError}
+                      </p>
+                    )
+                  : (
+                      <p className="mt-1 text-xs text-gray-500">
+                        Trạng thái hiện tại:
+                        {' '}
+                        <strong>{getStatusText(selectedRequest.status)}</strong>
+                      </p>
+                    )}
               </div>
 
               <div>
@@ -987,14 +1041,31 @@ export default function ServiceRequestsPage() {
                   id="update-reason"
                   rows={4}
                   value={updateReason}
-                  onChange={e => setUpdateReason(e.target.value)}
+                  onChange={(e) => {
+                    setUpdateReason(e.target.value);
+                    if (updateReasonError) {
+                      setUpdateReasonError('');
+                    }
+                  }}
                   placeholder="Nhập lý do cập nhật (tối thiểu 10 ký tự)..."
-                  className="mt-1 w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  className={`mt-1 w-full rounded-lg border p-2 text-sm focus:ring-1 focus:outline-none ${
+                    updateReasonError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  {updateReason.length}
-                  /10 ký tự
-                </p>
+                {updateReasonError
+                  ? (
+                      <p className="mt-1 text-xs text-red-600">
+                        {updateReasonError}
+                      </p>
+                    )
+                  : (
+                      <p className="mt-1 text-xs text-gray-500">
+                        {updateReason.length}
+                        /10 ký tự
+                      </p>
+                    )}
               </div>
 
               <label className="flex items-center gap-2">
@@ -1015,15 +1086,18 @@ export default function ServiceRequestsPage() {
                   setUpdateStatusModal(false);
                   setUpdateReason('');
                 }}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                disabled={isUpdatingStatus}
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Đóng
               </button>
               <button
                 type="button"
                 onClick={handleUpdateStatus}
-                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                disabled={isUpdatingStatus}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
+                {isUpdatingStatus && <Loader2 className="h-4 w-4 animate-spin" />}
                 Cập nhật
               </button>
             </div>

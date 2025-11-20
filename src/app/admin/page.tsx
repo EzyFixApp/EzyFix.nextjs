@@ -1,14 +1,23 @@
 'use client';
 
+import type {
+  CommissionReportData,
+  RevenueByServiceData,
+  RevenueByTechnicianData,
+  RevenueOverviewData,
+  TransactionItem,
+  TransactionsData,
+} from '@/types/analytics';
 import {
   ArrowUpRight,
   DollarSign,
+  Loader2,
   Percent,
   Receipt,
   TrendingUp,
   Wrench,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -24,177 +33,96 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { toast } from 'sonner';
 
-// Mock data theo Revenue Analytics API structure
-const revenueOverview = {
-  summary: {
-    totalRevenue: 25000000.0,
-    totalCommission: 3750000.0,
-    totalPayouts: 21250000.0,
-    totalTransactions: 45,
-    completedAppointments: 40,
-    averageOrderValue: 625000.0,
-    commissionRate: 0.15,
-  },
-  comparison: {
-    previousPeriodRevenue: 20000000.0,
-    revenueGrowth: 0.25,
-    previousPeriodTransactions: 35,
-    transactionGrowth: 0.286,
-  },
-  breakdown: [
-    { date: '11/11', revenue: 1200000, commission: 180000, payouts: 1020000, transactions: 2 },
-    { date: '12/11', revenue: 1500000, commission: 225000, payouts: 1275000, transactions: 3 },
-    { date: '13/11', revenue: 1800000, commission: 270000, payouts: 1530000, transactions: 4 },
-    { date: '14/11', revenue: 2200000, commission: 330000, payouts: 1870000, transactions: 5 },
-    { date: '15/11', revenue: 1900000, commission: 285000, payouts: 1615000, transactions: 4 },
-    { date: '16/11', revenue: 2400000, commission: 360000, payouts: 2040000, transactions: 6 },
-    { date: '17/11', revenue: 2100000, commission: 315000, payouts: 1785000, transactions: 5 },
-  ],
-  paymentMethods: {
-    ONLINE: { count: 30, total: 18000000.0, percentage: 0.72 },
-    CASH: { count: 15, total: 7000000.0, percentage: 0.28 },
-  },
-};
-
-const revenueByService = [
-  {
-    serviceName: 'Sửa điều hòa',
-    categoryName: 'Điện lạnh',
-    totalRevenue: 8500000.0,
-    totalCommission: 1275000.0,
-    totalTransactions: 15,
-    percentageOfTotal: 0.34,
-    growth: 0.2,
-  },
-  {
-    serviceName: 'Sửa tủ lạnh',
-    categoryName: 'Điện lạnh',
-    totalRevenue: 6000000.0,
-    totalCommission: 900000.0,
-    totalTransactions: 12,
-    percentageOfTotal: 0.24,
-    growth: 0.15,
-  },
-  {
-    serviceName: 'Sửa máy giặt',
-    categoryName: 'Gia dụng',
-    totalRevenue: 4500000.0,
-    totalCommission: 675000.0,
-    totalTransactions: 10,
-    percentageOfTotal: 0.18,
-    growth: 0.1,
-  },
-  {
-    serviceName: 'Sửa TV',
-    categoryName: 'Điện tử',
-    totalRevenue: 3500000.0,
-    totalCommission: 525000.0,
-    totalTransactions: 5,
-    percentageOfTotal: 0.14,
-    growth: -0.05,
-  },
-  {
-    serviceName: 'Sửa bình nóng lạnh',
-    categoryName: 'Gia dụng',
-    totalRevenue: 2500000.0,
-    totalCommission: 375000.0,
-    totalTransactions: 3,
-    percentageOfTotal: 0.1,
-    growth: 0.08,
-  },
-];
-
-const topTechnicians = [
-  {
-    firstName: 'Trần',
-    lastName: 'Văn B',
-    statistics: {
-      totalEarnings: 5500000.0,
-      platformCommission: 825000.0,
-      netEarnings: 4675000.0,
-      totalJobs: 12,
-      completedJobs: 11,
-      averageJobValue: 500000.0,
-      averageRating: 4.8,
-    },
-    performance: {
-      completionRate: 0.917,
-      rank: 1,
-    },
-  },
-  {
-    firstName: 'Nguyễn',
-    lastName: 'Văn C',
-    statistics: {
-      totalEarnings: 4800000.0,
-      platformCommission: 720000.0,
-      netEarnings: 4080000.0,
-      totalJobs: 10,
-      completedJobs: 9,
-      averageJobValue: 533333.33,
-      averageRating: 4.7,
-    },
-    performance: {
-      completionRate: 0.9,
-      rank: 2,
-    },
-  },
-  {
-    firstName: 'Lê',
-    lastName: 'Thị D',
-    statistics: {
-      totalEarnings: 4200000.0,
-      platformCommission: 630000.0,
-      netEarnings: 3570000.0,
-      totalJobs: 9,
-      completedJobs: 8,
-      averageJobValue: 525000.0,
-      averageRating: 4.9,
-    },
-    performance: {
-      completionRate: 0.889,
-      rank: 3,
-    },
-  },
-  {
-    firstName: 'Phạm',
-    lastName: 'Văn E',
-    statistics: {
-      totalEarnings: 3900000.0,
-      platformCommission: 585000.0,
-      netEarnings: 3315000.0,
-      totalJobs: 8,
-      completedJobs: 7,
-      averageJobValue: 557142.86,
-      averageRating: 4.6,
-    },
-    performance: {
-      completionRate: 0.875,
-      rank: 4,
-    },
-  },
-  {
-    firstName: 'Hoàng',
-    lastName: 'Văn F',
-    statistics: {
-      totalEarnings: 3600000.0,
-      platformCommission: 540000.0,
-      netEarnings: 3060000.0,
-      totalJobs: 7,
-      completedJobs: 6,
-      averageJobValue: 600000.0,
-      averageRating: 4.5,
-    },
-    performance: {
-      completionRate: 0.857,
-      rank: 5,
-    },
-  },
-];
+import RevenueAnalyticsService from '@/libs/RevenueAnalyticsService';
 
 export default function AdminDashboard() {
-  const [dateRange, setDateRange] = useState('7days');
+  const [dateRange, setDateRange] = useState<'7days' | '30days' | 'thisMonth' | 'lastMonth' | 'thisYear'>('30days');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // State cho các API data
+  const [revenueOverview, setRevenueOverview] = useState<RevenueOverviewData | null>(null);
+  const [revenueByService, setRevenueByService] = useState<RevenueByServiceData | null>(null);
+  const [topTechnicians, setTopTechnicians] = useState<RevenueByTechnicianData | null>(null);
+  const [transactions, setTransactions] = useState<TransactionsData | null>(null);
+  const [commissionReport, setCommissionReport] = useState<CommissionReportData | null>(null);
+
+  // Fetch data từ API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        const dateParams = RevenueAnalyticsService.getDateRange(dateRange);
+
+        // Parallel fetch all analytics data (5 APIs)
+        const [overviewRes, serviceRes, technicianRes, transactionsRes, commissionRes] = await Promise.all([
+          RevenueAnalyticsService.getRevenueOverview({
+            ...dateParams,
+            groupBy: 'day',
+          }),
+          RevenueAnalyticsService.getRevenueByService({
+            ...dateParams,
+            top: 5,
+          }),
+          RevenueAnalyticsService.getRevenueByTechnician({
+            ...dateParams,
+            sortBy: 'revenue',
+            order: 'desc',
+            top: 5,
+          }),
+          RevenueAnalyticsService.getTransactions({
+            fromDate: dateParams.fromDate,
+            toDate: dateParams.toDate,
+            page: 1,
+            pageSize: 10,
+          }),
+          RevenueAnalyticsService.getCommissionReport({
+            ...dateParams,
+            groupBy: 'service',
+          }),
+        ]);
+
+        if (overviewRes.is_success) {
+          setRevenueOverview(overviewRes.data);
+        } else {
+          toast.error('Không thể tải dữ liệu tổng quan doanh thu');
+        }
+
+        if (serviceRes.is_success) {
+          setRevenueByService(serviceRes.data);
+        } else {
+          toast.error('Không thể tải dữ liệu doanh thu theo dịch vụ');
+        }
+
+        if (technicianRes.is_success) {
+          setTopTechnicians(technicianRes.data);
+        } else {
+          toast.error('Không thể tải dữ liệu thợ xuất sắc');
+        }
+
+        if (transactionsRes.is_success) {
+          setTransactions(transactionsRes.data);
+        } else {
+          console.error('❌ Transactions API failed:', transactionsRes);
+          toast.error('Không thể tải dữ liệu giao dịch');
+        }
+
+        if (commissionRes.is_success) {
+          setCommissionReport(commissionRes.data);
+        } else {
+          toast.error('Không thể tải báo cáo hoa hồng');
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        toast.error('Có lỗi xảy ra khi tải dữ liệu dashboard');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [dateRange]);
 
   // Format currency
   const formatCurrency = (amount: number) =>
@@ -209,23 +137,56 @@ export default function AdminDashboard() {
   // Format percentage
   const formatPercentage = (value: number) => `${(value * 100).toFixed(1)}%`;
 
-  // Prepare payment method pie chart data
-  const paymentMethodData = [
-    {
-      name: 'Online',
-      value: revenueOverview.paymentMethods.ONLINE.total,
-      count: revenueOverview.paymentMethods.ONLINE.count,
-      percentage: revenueOverview.paymentMethods.ONLINE.percentage,
-      color: '#3B82F6',
-    },
-    {
-      name: 'Tiền mặt',
-      value: revenueOverview.paymentMethods.CASH.total,
-      count: revenueOverview.paymentMethods.CASH.count,
-      percentage: revenueOverview.paymentMethods.CASH.percentage,
-      color: '#10B981',
-    },
-  ];
+  // Format date for breakdown chart
+  const formatBreakdownDate = (dateStr: string | null) => {
+    if (!dateStr) {
+      return '';
+    }
+    try {
+      const date = new Date(dateStr);
+      return `${date.getDate()}/${date.getMonth() + 1}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Loading state
+  if (isLoading || !revenueOverview) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+          <p className="text-gray-600">Đang tải dữ liệu dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare payment method pie chart data (nếu có)
+  const paymentMethodData = revenueOverview.paymentMethods
+    ? [
+        {
+          name: 'Online',
+          value: revenueOverview.paymentMethods.ONLINE?.total || 0,
+          count: revenueOverview.paymentMethods.ONLINE?.count || 0,
+          percentage: revenueOverview.paymentMethods.ONLINE?.percentage || 0,
+          color: '#3B82F6',
+        },
+        {
+          name: 'Tiền mặt',
+          value: revenueOverview.paymentMethods.CASH?.total || 0,
+          count: revenueOverview.paymentMethods.CASH?.count || 0,
+          percentage: revenueOverview.paymentMethods.CASH?.percentage || 0,
+          color: '#10B981',
+        },
+      ]
+    : [];
+
+  // Prepare breakdown data with formatted dates
+  const breakdownData = revenueOverview.breakdown.map(item => ({
+    ...item,
+    date: formatBreakdownDate(item.date),
+  }));
 
   return (
     <div className="space-y-6">
@@ -240,14 +201,14 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           <select
             value={dateRange}
-            onChange={e => setDateRange(e.target.value)}
+            onChange={e => setDateRange(e.target.value as typeof dateRange)}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           >
-            <option value="today">Hôm nay</option>
             <option value="7days">7 ngày qua</option>
             <option value="30days">30 ngày qua</option>
             <option value="thisMonth">Tháng này</option>
             <option value="lastMonth">Tháng trước</option>
+            <option value="thisYear">Năm nay</option>
           </select>
         </div>
       </div>
@@ -367,7 +328,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={revenueOverview.breakdown}>
+            <AreaChart data={breakdownData}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
@@ -434,57 +395,67 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-semibold text-gray-900">Phương thức thanh toán</h3>
             <p className="text-sm text-gray-500">Phân bố theo loại</p>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={paymentMethodData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {paymentMethodData.map(entry => (
-                  <Cell key={entry.name} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-                formatter={(value: number) => [formatCurrency(value), 'Tổng tiền']}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 space-y-3">
-            {paymentMethodData.map(item => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm text-gray-600">{item.name}</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">
-                    {formatCurrency(item.value)}
+          {paymentMethodData.length > 0
+            ? (
+                <>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={paymentMethodData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {paymentMethodData.map(entry => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                        }}
+                        formatter={(value: number) => [formatCurrency(value), 'Tổng tiền']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 space-y-3">
+                    {paymentMethodData.map(item => (
+                      <div key={item.name} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="text-sm text-gray-600">{item.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(item.value)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {item.count}
+                            {' '}
+                            giao dịch (
+                            {formatPercentage(item.percentage)}
+                            )
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {item.count}
-                    {' '}
-                    giao dịch (
-                    {formatPercentage(item.percentage)}
-                    )
-                  </div>
+                </>
+              )
+            : (
+                <div className="flex h-[250px] items-center justify-center text-gray-400">
+                  <p>Chưa có dữ liệu phương thức thanh toán</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
         </div>
       </div>
 
@@ -497,43 +468,51 @@ export default function AdminDashboard() {
           </div>
           <Wrench className="h-5 w-5 text-gray-400" />
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={revenueByService}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="serviceName" stroke="#6B7280" fontSize={12} />
-            <YAxis
-              stroke="#6B7280"
-              fontSize={12}
-              tickFormatter={value => `${(value / 1000000).toFixed(1)}M`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              }}
-              formatter={(value: number, name: string) => {
-                const labels: Record<string, string> = {
-                  totalRevenue: 'Doanh thu',
-                  totalCommission: 'Hoa hồng',
-                };
-                return [formatCurrency(value), labels[name] || name];
-              }}
-            />
-            <Legend
-              formatter={(value) => {
-                const labels: Record<string, string> = {
-                  totalRevenue: 'Doanh thu',
-                  totalCommission: 'Hoa hồng',
-                };
-                return labels[value] || value;
-              }}
-            />
-            <Bar dataKey="totalCommission" fill="#10B981" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="totalRevenue" fill="#3B82F6" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {revenueByService && revenueByService.services.length > 0
+          ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={revenueByService.services}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="serviceName" stroke="#6B7280" fontSize={12} />
+                  <YAxis
+                    stroke="#6B7280"
+                    fontSize={12}
+                    tickFormatter={value => `${(value / 1000000).toFixed(1)}M`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    }}
+                    formatter={(value: number, name: string) => {
+                      const labels: Record<string, string> = {
+                        totalRevenue: 'Doanh thu',
+                        totalCommission: 'Hoa hồng',
+                      };
+                      return [formatCurrency(value), labels[name] || name];
+                    }}
+                  />
+                  <Legend
+                    formatter={(value) => {
+                      const labels: Record<string, string> = {
+                        totalRevenue: 'Doanh thu',
+                        totalCommission: 'Hoa hồng',
+                      };
+                      return labels[value] || value;
+                    }}
+                  />
+                  <Bar dataKey="totalCommission" fill="#10B981" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="totalRevenue" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )
+          : (
+              <div className="flex h-[300px] items-center justify-center text-gray-400">
+                <p>Chưa có dữ liệu doanh thu theo dịch vụ</p>
+              </div>
+            )}
       </div>
 
       {/* Top Technicians Table */}
@@ -543,108 +522,340 @@ export default function AdminDashboard() {
           <p className="text-sm text-gray-500">Thợ có thu nhập cao nhất trong kỳ</p>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Xếp hạng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Thợ
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Tổng thu nhập
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Hoa hồng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Thu nhập ròng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Công việc
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Đánh giá
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                  Tỷ lệ hoàn thành
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {topTechnicians.map(tech => (
-                <tr key={`${tech.lastName}-${tech.firstName}`} className="transition-colors hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex h-8 w-8 items-center justify-between rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-sm font-bold text-white">
-                      <span className="w-full text-center">
-                        #
-                        {tech.performance.rank}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-purple-400 text-sm font-bold text-white">
-                        {tech.lastName.charAt(0)}
-                      </div>
-                      <div className="ml-4">
-                        <div className="font-medium text-gray-900">
-                          {tech.lastName}
-                          {' '}
-                          {tech.firstName}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {tech.statistics.completedJobs}
-                          /
-                          {tech.statistics.totalJobs}
-                          {' '}
-                          việc
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                    {formatCurrency(tech.statistics.totalEarnings)}
-                  </td>
-                  <td className="px-6 py-4 text-sm whitespace-nowrap text-red-600">
-                    <span>
-                      -
-                      {formatCurrency(tech.statistics.platformCommission)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-green-600">
-                    {formatCurrency(tech.statistics.netEarnings)}
-                  </td>
-                  <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-                    {formatCurrency(tech.statistics.averageJobValue)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-400">⭐</span>
-                      <span className="font-medium text-gray-900">
-                        {tech.statistics.averageRating.toFixed(1)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-20 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-500"
-                          style={{ width: `${tech.performance.completionRate * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {formatPercentage(tech.performance.completionRate)}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {topTechnicians && topTechnicians.technicians.length > 0
+            ? (
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Xếp hạng
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Thợ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Tổng thu nhập
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Hoa hồng
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Thu nhập ròng
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Công việc
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Đánh giá
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Tỷ lệ hoàn thành
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {topTechnicians.technicians.map(tech => (
+                      <tr key={tech.technicianId} className="transition-colors hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex h-8 w-8 items-center justify-between rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-sm font-bold text-white">
+                            <span className="w-full text-center">
+                              #
+                              {tech.performance.rank}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-purple-400 text-sm font-bold text-white">
+                              {(tech.lastName || tech.firstName || 'U').charAt(0)}
+                            </div>
+                            <div className="ml-4">
+                              <div className="font-medium text-gray-900">
+                                {tech.lastName}
+                                {' '}
+                                {tech.firstName}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {tech.statistics.completedJobs}
+                                /
+                                {tech.statistics.totalJobs}
+                                {' '}
+                                việc
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                          {formatCurrency(tech.statistics.totalEarnings)}
+                        </td>
+                        <td className="px-6 py-4 text-sm whitespace-nowrap text-red-600">
+                          <span>
+                            -
+                            {formatCurrency(tech.statistics.platformCommission)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-green-600">
+                          {formatCurrency(tech.statistics.netEarnings)}
+                        </td>
+                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                          {formatCurrency(tech.statistics.averageJobValue)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1">
+                            <span className="text-yellow-400">⭐</span>
+                            <span className="font-medium text-gray-900">
+                              {tech.statistics.averageRating.toFixed(1)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-20 overflow-hidden rounded-full bg-gray-200">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-500"
+                                style={{ width: `${tech.performance.completionRate * 100}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatPercentage(tech.performance.completionRate)}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
+            : (
+                <div className="flex h-[200px] items-center justify-center text-gray-400">
+                  <p>Chưa có dữ liệu thợ trong kỳ</p>
+                </div>
+              )}
         </div>
+      </div>
+
+      {/* Recent Transactions Table */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900">Giao dịch gần đây</h3>
+          <p className="text-sm text-gray-500">
+            {transactions?.pagination.totalItems || 0}
+            {' '}
+            giao dịch trong kỳ
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          {transactions && transactions.items.length > 0
+            ? (
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Mã giao dịch
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Dịch vụ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Khách hàng
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Thợ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Số tiền
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Hoa hồng
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Thanh toán
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Trạng thái
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                        Thời gian
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {transactions.items.map((txn: TransactionItem) => (
+                      <tr key={txn.transactionId} className="transition-colors hover:bg-gray-50">
+                        <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-blue-600">
+                          #
+                          {txn.transactionId.slice(-8).toUpperCase()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{txn.type || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{txn.from?.name || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{txn.to?.name || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                          {formatCurrency(txn.amount)}
+                        </td>
+                        <td className="px-6 py-4 text-sm whitespace-nowrap text-orange-600">
+                          {formatCurrency(txn.commissionAmount)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                            {txn.paymentMethod === 'CASH' && 'Tiền mặt'}
+                            {txn.paymentMethod === 'ONLINE' && 'Online'}
+                            {(!txn.paymentMethod || txn.paymentMethod === 'WALLET') && 'Ví'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              txn.status?.toUpperCase() === 'COMPLETE'
+                                ? 'bg-green-100 text-green-800'
+                                : txn.status?.toUpperCase() === 'PENDING'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : txn.status?.toUpperCase() === 'FAILED'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {txn.status?.toUpperCase() === 'COMPLETE' && 'Hoàn thành'}
+                            {txn.status?.toUpperCase() === 'PENDING' && 'Đang chờ'}
+                            {txn.status?.toUpperCase() === 'FAILED' && 'Thất bại'}
+                            {!txn.status && 'Không rõ'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500">
+                          {new Date(txn.createdDate).toLocaleString('vi-VN')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
+            : (
+                <div className="flex h-[200px] items-center justify-center text-gray-400">
+                  <p>Chưa có giao dịch nào trong kỳ</p>
+                </div>
+              )}
+        </div>
+      </div>
+
+      {/* Commission Report */}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900">Báo cáo hoa hồng</h3>
+          <p className="text-sm text-gray-500">Phân tích hoa hồng theo dịch vụ</p>
+        </div>
+
+        {commissionReport
+          ? (
+              <div className="p-6">
+                {/* Summary Cards */}
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+                    <div className="text-sm font-medium text-blue-600">Tổng doanh thu</div>
+                    <div className="mt-1 text-2xl font-bold text-blue-900">
+                      {formatCurrency(commissionReport.summary.totalRevenue)}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-orange-50 to-orange-100 p-4">
+                    <div className="text-sm font-medium text-orange-600">Tổng hoa hồng</div>
+                    <div className="mt-1 text-2xl font-bold text-orange-900">
+                      {formatCurrency(commissionReport.summary.totalCommission)}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
+                    <div className="text-sm font-medium text-green-600">Thu nhập ròng</div>
+                    <div className="mt-1 text-2xl font-bold text-green-900">
+                      {formatCurrency(commissionReport.summary.totalRevenue - commissionReport.summary.totalCommission)}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-gradient-to-br from-purple-50 to-purple-100 p-4">
+                    <div className="text-sm font-medium text-purple-600">Tỷ lệ hoa hồng TB</div>
+                    <div className="mt-1 text-2xl font-bold text-purple-900">
+                      {formatPercentage(commissionReport.summary.averageCommissionRate)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Breakdown Table */}
+                <div className="overflow-x-auto">
+                  {commissionReport.breakdown.length > 0
+                    ? (
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Dịch vụ
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Doanh thu
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Hoa hồng
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Thu nhập thợ
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Tỷ lệ hoa hồng
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                                Số giao dịch
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {commissionReport.breakdown.map(item => (
+                              <tr key={`${item.serviceId || item.technicianId || ''}-${item.date || 'total'}`} className="transition-colors hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="font-medium text-gray-900">{item.serviceName || item.technicianName || 'N/A'}</div>
+                                </td>
+                                <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
+                                  {formatCurrency(item.totalRevenue)}
+                                </td>
+                                <td className="px-6 py-4 text-sm whitespace-nowrap text-orange-600">
+                                  {formatCurrency(item.commissionCollected)}
+                                </td>
+                                <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-green-600">
+                                  {formatCurrency(item.totalRevenue - item.commissionCollected)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-2 w-20 overflow-hidden rounded-full bg-gray-200">
+                                      <div
+                                        className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500"
+                                        style={{ width: `${item.commissionRate * 100}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {formatPercentage(item.commissionRate)}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
+                                  {formatNumber(item.transactions)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )
+                    : (
+                        <div className="flex h-[200px] items-center justify-center text-gray-400">
+                          <p>Chưa có dữ liệu hoa hồng</p>
+                        </div>
+                      )}
+                </div>
+              </div>
+            )
+          : (
+              <div className="flex h-[300px] items-center justify-center text-gray-400">
+                <p>Chưa có dữ liệu báo cáo hoa hồng</p>
+              </div>
+            )}
       </div>
     </div>
   );

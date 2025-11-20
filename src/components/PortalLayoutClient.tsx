@@ -6,7 +6,6 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Clock,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -91,11 +90,6 @@ export default function PortalLayoutClient({ children }: { children: React.React
       title: 'Chat hỗ trợ',
       href: '/support/chat',
       icon: MessageSquare,
-    },
-    {
-      title: 'Lịch sử',
-      href: '/support/logs',
-      icon: Clock,
     },
   ];
 
@@ -209,7 +203,7 @@ export default function PortalLayoutClient({ children }: { children: React.React
 
       {/* Main Content */}
       <main
-        className={`flex-1 transition-all duration-300 ${
+        className={`flex-1 overflow-x-auto transition-all duration-300 ${
           sidebarOpen ? 'ml-64' : 'ml-20'
         }`}
       >

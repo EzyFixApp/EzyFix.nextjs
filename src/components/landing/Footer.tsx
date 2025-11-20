@@ -23,8 +23,7 @@ const Footer = () => {
                 />
               </div>
               <span className="text-2xl leading-none font-bold">
-                Ezy
-                <span className="text-[#609CEF]">Fix</span>
+                <span className="bg-gradient-to-r from-[#C3EAFA] to-[#5E9BEF] bg-clip-text text-transparent">EzyFix</span>
               </span>
             </div>
             <p className="mb-4 text-gray-400">
