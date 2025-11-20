@@ -20,8 +20,8 @@ export class AppointmentService {
    * Lấy danh sách tất cả appointments với filter và pagination
    */
   static async getAllAppointments(params?: GetAppointmentsParams): Promise<AppointmentListResponse> {
-    const response = await apiClient.get<AppointmentListResponse>(this.BASE_PATH, { params });
-    return response.data;
+    const response = await apiClient.get<{ data: AppointmentListResponse }>(this.BASE_PATH, { params });
+    return response.data.data;
   }
 
   /**
@@ -29,8 +29,8 @@ export class AppointmentService {
    * Lấy thông tin chi tiết đầy đủ của một appointment
    */
   static async getAppointmentById(id: string): Promise<AppointmentDetails> {
-    const response = await apiClient.get<AppointmentDetails>(`${this.BASE_PATH}/${id}`);
-    return response.data;
+    const response = await apiClient.get<{ data: AppointmentDetails }>(`${this.BASE_PATH}/${id}`);
+    return response.data.data;
   }
 
   /**
@@ -41,11 +41,11 @@ export class AppointmentService {
     id: string,
     data: CancelAppointmentRequest,
   ): Promise<CancelAppointmentResponse> {
-    const response = await apiClient.patch<CancelAppointmentResponse>(
+    const response = await apiClient.patch<{ data: CancelAppointmentResponse }>(
       `${this.BASE_PATH}/${id}/cancel`,
       data,
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -56,11 +56,11 @@ export class AppointmentService {
     id: string,
     data: ReassignAppointmentRequest,
   ): Promise<ReassignAppointmentResponse> {
-    const response = await apiClient.patch<ReassignAppointmentResponse>(
+    const response = await apiClient.patch<{ data: ReassignAppointmentResponse }>(
       `${this.BASE_PATH}/${id}/reassign`,
       data,
     );
-    return response.data;
+    return response.data.data;
   }
 
   /**
@@ -71,10 +71,10 @@ export class AppointmentService {
     id: string,
     data: UpdateStatusRequest,
   ): Promise<UpdateStatusResponse> {
-    const response = await apiClient.patch<UpdateStatusResponse>(
+    const response = await apiClient.patch<{ data: UpdateStatusResponse }>(
       `${this.BASE_PATH}/${id}/status`,
       data,
     );
-    return response.data;
+    return response.data.data;
   }
 }

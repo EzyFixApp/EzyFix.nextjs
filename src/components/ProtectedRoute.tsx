@@ -84,8 +84,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       );
     }
 
-    // Support portal - allow Admin and Support roles
-    if (isSupport && userRole !== 'admin' && userRole !== 'supporter') {
+    // Support portal - only allow Support role (NOT Admin)
+    if (isSupport && userRole !== 'supporter') {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
@@ -99,7 +99,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
             <div className="mb-6 rounded-lg bg-red-50 p-4">
               <div className="flex items-center justify-center gap-2 text-red-700">
                 <ShieldAlert className="h-5 w-5" />
-                <span className="font-semibold">Admin or Support role required</span>
+                <span className="font-semibold">Support role required</span>
               </div>
             </div>
             <button
