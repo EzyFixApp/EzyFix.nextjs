@@ -131,6 +131,7 @@
     "about": "About us",
     "customer": "Customers",
     "technician": "Technicians",
+    "privacy_policy": "Privacy Policy",
     "contact": "Contact",
     "location": "Ho Chi Minh City, Vietnam",
     "rights": "All rights reserved."
@@ -402,5 +403,159 @@
     "reward3_desc": "Exclusive vouchers",
     "closing_message1": "Sincerely,",
     "closing_message2": "The EzyFix Team 🔧"
+  },
+  "PrivacyPolicy": {
+    "meta_title": "Privacy Policy - EzyFix",
+    "meta_description": "EzyFix Privacy Policy - Our commitment to protecting your privacy and personal information",
+    "title": "Privacy Policy",
+    "subtitle": "Our commitment to protecting your privacy",
+    "introduction": "EzyFix (\"we\", \"our\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and protect your personal information when you use the EzyFix application.",
+    "effective_date": "Effective Date: October 22, 2025",
+    "last_updated": "Last Updated: November 22, 2025",
+    "section1_title": "Information We Collect",
+    "section1_subtitle1": "Information You Provide",
+    "section1_items1": [
+      "Account information: Name, email, phone number, password",
+      "Profile information: Profile picture, address, payment information",
+      "Service information: Repair request description, on-site photos",
+      "Transaction information: Order history, payments, reviews"
+    ],
+    "section1_subtitle2": "Information Collected Automatically",
+    "section1_items2": [
+      "Location data: GPS for finding nearby technicians and routing",
+      "Background location tracking: When you have an active order (as a technician), the app continues to track your location in the background to display real-time location to customers. You can disable this feature in Settings, but the order tracking function will not work",
+      "Device information: Model, operating system, device ID",
+      "Usage data: Usage time, features used, error logs",
+      "Network information: IP address, connection type",
+      "Local storage data: App settings, login status, and user preferences stored on your device (not shared with servers)",
+      "Microphone (Audio recording): Used when you send voice messages or make support calls within the app (only when you actively use it)",
+      "Appointment and reminders: The app requires permission to set exact alarms to send timely reminders about repair appointments"
+    ],
+    "section1_subtitle3": "Information from Third Parties",
+    "section1_items3": [
+      "Authentication: Information from Google, Facebook (if logged in via social networks)",
+      "Payment: Confirmation information from PayOS",
+      "Maps: Data from Google Maps API"
+    ],
+    "section2_title": "How We Use Information",
+    "section2_subtitle1": "Providing Services",
+    "section2_items1": [
+      "Connect customers with technicians",
+      "Process bookings and payments",
+      "Send notifications about order status",
+      "Customer support and dispute resolution"
+    ],
+    "section2_subtitle2": "Improving Experience",
+    "section2_items2": [
+      "Personalize content and recommendations",
+      "Analyze usage behavior",
+      "Develop new features",
+      "Optimize app performance"
+    ],
+    "section2_subtitle3": "Safety and Security",
+    "section2_items3": [
+      "Detect fraud and abuse",
+      "Verify user identity",
+      "Protect user rights",
+      "Comply with laws"
+    ],
+    "section2_subtitle4": "Marketing and Communications",
+    "section2_items4": [
+      "Send promotional notifications (with consent)",
+      "Newsletter and service updates",
+      "Satisfaction surveys"
+    ],
+    "section3_title": "Information Sharing",
+    "section3_subtitle1": "With Technicians",
+    "section3_items1": [
+      "Customer name, phone number, address (when there is an order)",
+      "Service request information"
+    ],
+    "section3_subtitle2": "With Payment Partners",
+    "section3_items2": [
+      "Payment information via PayOS (encrypted)",
+      "Transaction history"
+    ],
+    "section3_subtitle3": "With Service Providers",
+    "section3_items3": [
+      "Google Maps (location and mapping)",
+      "Firebase (push notifications, analytics)",
+      "AWS/Cloud (data storage)"
+    ],
+    "section3_subtitle4": "As Required by Law",
+    "section3_items4": [
+      "Authorities (when there is a court order)",
+      "Protect EzyFix's rights and property"
+    ],
+    "section3_no_sell": "We DO NOT sell your personal information",
+    "section4_title": "Information Security",
+    "section4_subtitle1": "Technical Measures",
+    "section4_items1": [
+      "SSL/TLS data encryption",
+      "Password encryption (bcrypt)",
+      "Firewall and DDoS protection",
+      "Two-factor authentication (2FA)"
+    ],
+    "section4_subtitle2": "Organizational Measures",
+    "section4_items2": [
+      "Limit data access rights",
+      "Train staff on security",
+      "Regular security audits",
+      "Incident response plan"
+    ],
+    "section4_subtitle3": "Data Storage",
+    "section4_items3": [
+      "Servers in Vietnam or Singapore",
+      "Regular backups",
+      "Delete unnecessary data"
+    ],
+    "section5_title": "Your Rights",
+    "section5_subtitle1": "Access and Edit Rights",
+    "section5_items1": [
+      "View personal information in the app",
+      "Update profile information",
+      "Download your data"
+    ],
+    "section5_subtitle2": "Right to Delete",
+    "section5_items2": [
+      "Request account deletion: Settings > Account > Delete Account",
+      "Email: support@ezyfix.com with subject \"Delete My Account\"",
+      "Data will be deleted within 30 days"
+    ],
+    "section5_subtitle3": "Right to Refuse",
+    "section5_items3": [
+      "Turn off marketing notifications: Settings > Notifications",
+      "Turn off GPS: Device settings (but will limit functionality)",
+      "Turn off background location tracking: Settings > Permissions > Location > \"Only while using the app\"",
+      "Turn off microphone permission: Device Settings > App permissions > Microphone",
+      "Refuse cookies (if using web)"
+    ],
+    "section5_subtitle4": "Right to Complain",
+    "section5_items4": [
+      "Contact: support@ezyfix.com",
+      "Regulatory authority: Ministry of Information and Communications"
+    ],
+    "section6_title": "Data Retention",
+    "section6_subtitle1": "Retention Period",
+    "section6_items1": [
+      "Active accounts: Throughout the usage period",
+      "After account deletion: Personal data deleted after 30 days",
+      "Transaction data: Retained for 7 years (as required by law)",
+      "Anonymous data: May be retained indefinitely"
+    ],
+    "section6_subtitle2": "Automatic Data Deletion",
+    "section6_items2": [
+      "Error logs: After 90 days",
+      "Sessions: After 30 days of inactivity",
+      "Cache: Periodically"
+    ],
+    "notice_title": "Important Notice",
+    "notice_content": "EzyFix is not intended for users under 13 years of age. If we discover data from children under 13, we will delete it immediately. Parents can contact: support@ezyfix.com",
+    "contact_title": "Contact",
+    "contact_privacy": "For privacy policy: privacy@ezyfix.site",
+    "contact_support": "For service: support@ezyfix.site",
+    "phone": "Phone: 0787171612",
+    "business_hours": "Business hours: 8:00 AM - 10:00 PM (daily)",
+    "footer_note": "By using EzyFix, you agree to this Privacy Policy. This policy is drafted in accordance with Vietnam's Decree 13/2023/ND-CP on Personal Data Protection and the EU GDPR."
   }
 }

@@ -131,6 +131,7 @@
     "about": "Về chúng tôi",
     "customer": "Khách hàng",
     "technician": "Thợ sửa chữa",
+    "privacy_policy": "Chính sách bảo mật",
     "contact": "Liên hệ",
     "location": "TP. Hồ Chí Minh, Việt Nam",
     "rights": "All rights reserved."
@@ -402,5 +403,159 @@
     "reward3_desc": "Voucher đặc biệt",
     "closing_message1": "Trân trọng,",
     "closing_message2": "Đội ngũ EzyFix 🔧"
+  },
+  "PrivacyPolicy": {
+    "meta_title": "Chính sách Bảo mật - EzyFix",
+    "meta_description": "Chính sách bảo mật của EzyFix - Cam kết bảo vệ quyền riêng tư và thông tin cá nhân của bạn",
+    "title": "Chính sách Bảo mật",
+    "subtitle": "Cam kết bảo vệ quyền riêng tư của bạn",
+    "introduction": "EzyFix (\"chúng tôi\", \"của chúng tôi\") cam kết bảo vệ quyền riêng tư của bạn. Chính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng, chia sẻ và bảo vệ thông tin cá nhân của bạn khi sử dụng ứng dụng EzyFix.",
+    "effective_date": "Ngày hiệu lực: 22 tháng 10, 2025",
+    "last_updated": "Cập nhật lần cuối: 22 tháng 11, 2025",
+    "section1_title": "Thông tin chúng tôi thu thập",
+    "section1_subtitle1": "Thông tin bạn cung cấp",
+    "section1_items1": [
+      "Thông tin tài khoản: Tên, email, số điện thoại, mật khẩu",
+      "Thông tin hồ sơ: Ảnh đại diện, địa chỉ, thông tin thanh toán",
+      "Thông tin dịch vụ: Mô tả yêu cầu sửa chữa, ảnh hiện trường",
+      "Thông tin giao dịch: Lịch sử đơn hàng, thanh toán, đánh giá"
+    ],
+    "section1_subtitle2": "Thông tin thu thập tự động",
+    "section1_items2": [
+      "Vị trí địa lý: GPS để tìm thợ gần nhất và định tuyến",
+      "Theo dõi vị trí nền: Khi bạn có đơn hàng đang hoạt động (với vai trò thợ), ứng dụng tiếp tục theo dõi vị trí ở chế độ nền để hiển thị vị trí thời gian thực cho khách hàng. Bạn có thể tắt tính năng này trong Settings nhưng sẽ không thể sử dụng chức năng theo dõi đơn hàng",
+      "Thông tin thiết bị: Model, hệ điều hành, ID thiết bị",
+      "Dữ liệu sử dụng: Thời gian sử dụng, tính năng sử dụng, log lỗi",
+      "Thông tin mạng: Địa chỉ IP, loại kết nối",
+      "Dữ liệu lưu trữ cục bộ: Cài đặt ứng dụng, trạng thái đăng nhập, và tùy chọn người dùng được lưu trên thiết bị của bạn (không được chia sẻ với server)",
+      "Microphone (Ghi âm): Được sử dụng khi bạn gửi tin nhắn thoại hoặc gọi hỗ trợ trong ứng dụng (chỉ khi bạn chủ động sử dụng)",
+      "Lịch hẹn và nhắc nhở: Ứng dụng cần quyền đặt lịch chính xác để gửi thông báo nhắc nhở về cuộc hẹn sửa chữa đúng giờ"
+    ],
+    "section1_subtitle3": "Thông tin từ bên thứ ba",
+    "section1_items3": [
+      "Xác thực: Thông tin từ Google, Facebook (nếu đăng nhập qua mạng xã hội)",
+      "Thanh toán: Thông tin xác nhận từ PayOS",
+      "Bản đồ: Dữ liệu từ Google Maps API"
+    ],
+    "section2_title": "Cách chúng tôi sử dụng thông tin",
+    "section2_subtitle1": "Cung cấp dịch vụ",
+    "section2_items1": [
+      "Kết nối khách hàng với thợ sửa chữa",
+      "Xử lý đặt lịch và thanh toán",
+      "Gửi thông báo về trạng thái đơn hàng",
+      "Hỗ trợ khách hàng và giải quyết tranh chấp"
+    ],
+    "section2_subtitle2": "Cải thiện trải nghiệm",
+    "section2_items2": [
+      "Cá nhân hóa nội dung và đề xuất",
+      "Phân tích hành vi sử dụng",
+      "Phát triển tính năng mới",
+      "Tối ưu hiệu suất ứng dụng"
+    ],
+    "section2_subtitle3": "An toàn và bảo mật",
+    "section2_items3": [
+      "Phát hiện gian lận và lạm dụng",
+      "Xác minh danh tính người dùng",
+      "Bảo vệ quyền lợi người dùng",
+      "Tuân thủ pháp luật"
+    ],
+    "section2_subtitle4": "Marketing và truyền thông",
+    "section2_items4": [
+      "Gửi thông báo khuyến mãi (với sự đồng ý)",
+      "Newsletter và cập nhật dịch vụ",
+      "Khảo sát độ hài lòng"
+    ],
+    "section3_title": "Chia sẻ thông tin",
+    "section3_subtitle1": "Với thợ sửa chữa",
+    "section3_items1": [
+      "Tên, số điện thoại, địa chỉ khách hàng (khi có đơn hàng)",
+      "Thông tin yêu cầu dịch vụ"
+    ],
+    "section3_subtitle2": "Với đối tác thanh toán",
+    "section3_items2": [
+      "Thông tin thanh toán qua PayOS (được mã hóa)",
+      "Lịch sử giao dịch"
+    ],
+    "section3_subtitle3": "Với nhà cung cấp dịch vụ",
+    "section3_items3": [
+      "Google Maps (định vị và bản đồ)",
+      "Firebase (thông báo push, analytics)",
+      "AWS/Cloud (lưu trữ dữ liệu)"
+    ],
+    "section3_subtitle4": "Theo yêu cầu pháp lý",
+    "section3_items4": [
+      "Cơ quan chức năng (khi có lệnh của tòa án)",
+      "Bảo vệ quyền và tài sản của EzyFix"
+    ],
+    "section3_no_sell": "Chúng tôi KHÔNG bán thông tin cá nhân của bạn",
+    "section4_title": "Bảo mật thông tin",
+    "section4_subtitle1": "Biện pháp kỹ thuật",
+    "section4_items1": [
+      "Mã hóa dữ liệu SSL/TLS",
+      "Mã hóa mật khẩu (bcrypt)",
+      "Tường lửa và chống DDoS",
+      "Xác thực hai yếu tố (2FA)"
+    ],
+    "section4_subtitle2": "Biện pháp tổ chức",
+    "section4_items2": [
+      "Giới hạn quyền truy cập dữ liệu",
+      "Đào tạo nhân viên về bảo mật",
+      "Kiểm tra bảo mật định kỳ",
+      "Kế hoạch ứng phó sự cố"
+    ],
+    "section4_subtitle3": "Lưu trữ dữ liệu",
+    "section4_items3": [
+      "Server tại Việt Nam hoặc Singapore",
+      "Sao lưu định kỳ",
+      "Xóa dữ liệu không cần thiết"
+    ],
+    "section5_title": "Quyền của bạn",
+    "section5_subtitle1": "Quyền truy cập và chỉnh sửa",
+    "section5_items1": [
+      "Xem thông tin cá nhân trong app",
+      "Cập nhật thông tin hồ sơ",
+      "Tải xuống dữ liệu của bạn"
+    ],
+    "section5_subtitle2": "Quyền xóa",
+    "section5_items2": [
+      "Yêu cầu xóa tài khoản: Settings > Tài khoản > Xóa tài khoản",
+      "Email: support@ezyfix.com với tiêu đề \"Delete My Account\"",
+      "Dữ liệu sẽ xóa trong vòng 30 ngày"
+    ],
+    "section5_subtitle3": "Quyền từ chối",
+    "section5_items3": [
+      "Tắt thông báo marketing: Settings > Thông báo",
+      "Tắt GPS: Settings thiết bị (nhưng sẽ hạn chế chức năng)",
+      "Tắt theo dõi vị trí nền: Settings > Quyền truy cập > Vị trí > \"Chỉ khi sử dụng ứng dụng\"",
+      "Tắt quyền microphone: Settings thiết bị > Quyền ứng dụng > Microphone",
+      "Từ chối cookie (nếu dùng web)"
+    ],
+    "section5_subtitle4": "Quyền khiếu nại",
+    "section5_items4": [
+      "Liên hệ: support@ezyfix.com",
+      "Cơ quan quản lý: Bộ Thông tin và Truyền thông"
+    ],
+    "section6_title": "Lưu trữ dữ liệu",
+    "section6_subtitle1": "Thời gian lưu trữ",
+    "section6_items1": [
+      "Tài khoản hoạt động: Trong suốt thời gian sử dụng",
+      "Sau khi xóa tài khoản: Dữ liệu cá nhân xóa sau 30 ngày",
+      "Dữ liệu giao dịch: Lưu 7 năm (theo quy định pháp luật)",
+      "Dữ liệu ẩn danh: Có thể lưu vô thời hạn"
+    ],
+    "section6_subtitle2": "Xóa dữ liệu tự động",
+    "section6_items2": [
+      "Log lỗi: Sau 90 ngày",
+      "Session: Sau 30 ngày không hoạt động",
+      "Cache: Định kỳ"
+    ],
+    "notice_title": "Lưu ý quan trọng",
+    "notice_content": "EzyFix không nhắm đến người dùng dưới 13 tuổi. Nếu chúng tôi phát hiện dữ liệu của trẻ em dưới 13 tuổi, chúng tôi sẽ xóa ngay lập tức. Phụ huynh có thể liên hệ: support@ezyfix.com",
+    "contact_title": "Liên hệ",
+    "contact_privacy": "Về chính sách bảo mật: privacy@ezyfix.site",
+    "contact_support": "Về dịch vụ: support@ezyfix.site",
+    "phone": "Điện thoại: 0787171612",
+    "business_hours": "Giờ làm việc: 8:00 - 22:00 (hàng ngày)",
+    "footer_note": "Bằng việc sử dụng EzyFix, bạn đồng ý với Chính sách Bảo mật này. Chính sách được soạn thảo theo Nghị định 13/2023/NĐ-CP về Bảo vệ dữ liệu cá nhân của Việt Nam và GDPR của EU."
   }
 }
