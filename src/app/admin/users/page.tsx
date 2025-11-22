@@ -1,7 +1,6 @@
 'use client';
 
 import type {
-  ChangeRoleRequest,
   DeleteUserRequest,
   GetUsersParams,
   ResetPasswordRequest,
@@ -24,7 +23,6 @@ import {
   Shield,
   Trash2,
   UserCheck,
-  UserCog,
   Users,
   Wrench,
   X,
@@ -61,7 +59,6 @@ export default function UsersPage() {
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [verifyModal, setVerifyModal] = useState(false);
-  const [roleModal, setRoleModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [resetPasswordModal, setResetPasswordModal] = useState(false);
 
@@ -74,8 +71,6 @@ export default function UsersPage() {
   const [statusReason, setStatusReason] = useState('');
   const [verifyStatus, setVerifyStatus] = useState(true);
   const [verifyNotes, setVerifyNotes] = useState('');
-  const [newRole, setNewRole] = useState<UserRole>('Customer');
-  const [roleReason, setRoleReason] = useState('');
   const [deleteReason, setDeleteReason] = useState('');
   const [hardDelete, setHardDelete] = useState(false);
   const [resetReason, setResetReason] = useState('');
@@ -85,13 +80,11 @@ export default function UsersPage() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isChangingRole, setIsChangingRole] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   // Validation errors
   const [statusReasonError, setStatusReasonError] = useState(false);
-  const [roleReasonError, setRoleReasonError] = useState(false);
   const [deleteReasonError, setDeleteReasonError] = useState(false);
 
   // Fetch users
@@ -229,50 +222,6 @@ export default function UsersPage() {
     }
   };
 
-  // Handle change role
-  const handleChangeRole = (user: User) => {
-    setSelectedUser(user);
-    setNewRole(user.role);
-    setRoleReason('');
-    setRoleReasonError(false);
-    setRoleModal(true);
-  };
-
-  const submitChangeRole = async () => {
-    if (!selectedUser || !roleReason.trim()) {
-      setRoleReasonError(true);
-      toast.error('Vui lòng nhập lý do');
-      return;
-    }
-
-    if (newRole === selectedUser.role) {
-      toast.error('Vui lòng chọn role khác');
-      return;
-    }
-
-    setRoleReasonError(false);
-
-    try {
-      setIsChangingRole(true);
-      const request: ChangeRoleRequest = {
-        newRole,
-        reason: roleReason.trim(),
-        preserveData: true,
-      };
-
-      await UserService.changeRole(selectedUser.userId, request);
-      toast.success(`Đã thay đổi role từ ${selectedUser.role} sang ${newRole}`);
-      setRoleModal(false);
-      setSelectedUser(null);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error changing role:', error);
-      toast.error('Không thể thay đổi role');
-    } finally {
-      setIsChangingRole(false);
-    }
-  };
-
   // Handle delete user
   const handleDelete = (user: User) => {
     setSelectedUser(user);
@@ -373,7 +322,7 @@ export default function UsersPage() {
       case 'Technician':
         return <Wrench className="h-4 w-4" />;
       case 'Supporter':
-        return <UserCog className="h-4 w-4" />;
+        return <UserCheck className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
     }
@@ -390,7 +339,7 @@ export default function UsersPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Người dùng</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý người dùng</h1>
         <p className="text-sm text-gray-600">Quản lý tất cả người dùng trong hệ thống</p>
       </div>
 
@@ -442,7 +391,7 @@ export default function UsersPage() {
               <p className="text-xs text-gray-600">Supporter</p>
               <p className="mt-1 text-2xl font-bold text-green-600">{summary.roleBreakdown.Supporter}</p>
             </div>
-            <UserCog className="h-10 w-10 text-green-500" />
+            <UserCheck className="h-10 w-10 text-green-500" />
           </div>
         </div>
       </div>
@@ -662,14 +611,6 @@ export default function UsersPage() {
                                   <UserCheck className="h-5 w-5" />
                                 </button>
                               )}
-                              <button
-                                type="button"
-                                onClick={() => handleChangeRole(user)}
-                                className="rounded p-1 text-orange-600 transition-colors hover:bg-orange-50"
-                                title="Đổi role"
-                              >
-                                <UserCog className="h-5 w-5" />
-                              </button>
                               <button
                                 type="button"
                                 onClick={() => handleResetPassword(user)}
@@ -1106,102 +1047,6 @@ export default function UsersPage() {
                       )
                     : (
                         'Xác thực'
-                      )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Change Role Modal */}
-      {roleModal && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-8 py-6">
-              <h2 className="text-2xl font-bold text-gray-800">Thay đổi Role</h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setRoleModal(false);
-                  setSelectedUser(null);
-                }}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="mb-4 text-gray-600">
-                Thay đổi role cho
-                {' '}
-                <span className="font-medium">{selectedUser.fullName}</span>
-                {' '}
-                (hiện tại:
-                {' '}
-                <span className="font-medium">{selectedUser.role}</span>
-                )
-              </p>
-              <div className="mb-4">
-                <label htmlFor="new-role" className="mb-2 block text-sm font-medium text-gray-700">Role mới *</label>
-                <select
-                  id="new-role"
-                  value={newRole}
-                  onChange={e => setNewRole(e.target.value as UserRole)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="Customer">Customer</option>
-                  <option value="Technician">Technician</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Supporter">Supporter</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label htmlFor="role-reason" className="mb-2 block text-sm font-medium text-gray-700">Lý do *</label>
-                <textarea
-                  id="role-reason"
-                  value={roleReason}
-                  onChange={(e) => {
-                    setRoleReason(e.target.value);
-                    if (e.target.value.trim()) {
-                      setRoleReasonError(false);
-                    }
-                  }}
-                  rows={3}
-                  className={`w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                    roleReasonError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                  }`}
-                  placeholder="Nhập lý do..."
-                />
-                {roleReasonError && (
-                  <p className="mt-1 text-sm text-red-600">Vui lòng nhập lý do</p>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRoleModal(false);
-                    setSelectedUser(null);
-                  }}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  onClick={submitChangeRole}
-                  disabled={isChangingRole}
-                  className="flex-1 rounded-lg bg-orange-600 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
-                >
-                  {isChangingRole
-                    ? (
-                        <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                      )
-                    : (
-                        'Thay đổi'
                       )}
                 </button>
               </div>

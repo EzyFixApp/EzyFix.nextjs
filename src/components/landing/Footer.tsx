@@ -62,6 +62,14 @@ const Footer = () => {
                   {t('technician')}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="text-gray-400 transition-colors hover:text-white"
+                >
+                  {t('privacy_policy')}
+                </Link>
+              </li>
             </ul>
           </div>
 
