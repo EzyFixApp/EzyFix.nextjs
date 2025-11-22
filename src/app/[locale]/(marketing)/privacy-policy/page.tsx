@@ -267,10 +267,7 @@ export default function PrivacyPolicyPage() {
                 </h4>
                 <div className="space-y-2 text-blue-100">
                   <p>Email: privacy@ezyfix.site</p>
-                  <p>
-                    {t('phone')}
-                    : 0787171612
-                  </p>
+                  <p>{t('phone')}</p>
                 </div>
               </div>
               <div className="rounded-xl bg-white/10 p-6 backdrop-blur-sm">
