@@ -900,14 +900,22 @@ export default function AppointmentsPage() {
                     <div className="rounded-lg border border-gray-200 p-4">
                       <h3 className="mb-3 text-sm font-semibold text-gray-700">Khách hàng</h3>
                       <div className="flex items-start gap-3">
-                        <Image
-                          src={appointmentDetails.customer.avatarLink}
-                          alt={appointmentDetails.customer.fullName}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 rounded-full"
-                          unoptimized
-                        />
+                        {appointmentDetails.customer.avatarLink
+                          ? (
+                              <Image
+                                src={appointmentDetails.customer.avatarLink}
+                                alt={appointmentDetails.customer.fullName}
+                                width={48}
+                                height={48}
+                                className="h-12 w-12 rounded-full"
+                                unoptimized
+                              />
+                            )
+                          : (
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-gray-600">
+                                {appointmentDetails.customer.fullName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                         <div>
                           <p className="font-medium text-gray-800">{appointmentDetails.customer.fullName}</p>
                           <p className="text-sm text-gray-500">{appointmentDetails.customer.email}</p>
@@ -919,14 +927,22 @@ export default function AppointmentsPage() {
                     <div className="rounded-lg border border-gray-200 p-4">
                       <h3 className="mb-3 text-sm font-semibold text-gray-700">Thợ sửa chữa</h3>
                       <div className="flex items-start gap-3">
-                        <Image
-                          src={appointmentDetails.technician.avatarLink}
-                          alt={appointmentDetails.technician.fullName}
-                          width={48}
-                          height={48}
-                          className="h-12 w-12 rounded-full"
-                          unoptimized
-                        />
+                        {appointmentDetails.technician.avatarLink
+                          ? (
+                              <Image
+                                src={appointmentDetails.technician.avatarLink}
+                                alt={appointmentDetails.technician.fullName}
+                                width={48}
+                                height={48}
+                                className="h-12 w-12 rounded-full"
+                                unoptimized
+                              />
+                            )
+                          : (
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-gray-600">
+                                {appointmentDetails.technician.fullName.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                         <div>
                           <p className="font-medium text-gray-800">{appointmentDetails.technician.fullName}</p>
                           <p className="text-sm text-gray-500">{appointmentDetails.technician.email}</p>

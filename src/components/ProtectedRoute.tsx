@@ -22,11 +22,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useAuth();
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated (only after loading completes)
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       const loginPath = pathname.startsWith('/support') ? '/support/login' : '/admin/login';
-      router.push(loginPath);
+      router.replace(loginPath);
     }
   }, [isLoading, isAuthenticated, pathname, router]);
 

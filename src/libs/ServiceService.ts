@@ -175,9 +175,25 @@ class ServiceService {
       // if (serviceData.isActive !== undefined) {
       //   formData.append('IsActive', serviceData.isActive.toString());
       // }
+
+      // Xử lý serviceIconUrl: có thể là File (ảnh mới) hoặc string URL (giữ ảnh cũ)
       if (serviceData.serviceIconUrl instanceof File) {
         formData.append('ServiceIconUrl', serviceData.serviceIconUrl);
+        // eslint-disable-next-line no-console
+        console.log('✅ ServiceService: Appending NEW icon FILE to FormData');
+      } else if (typeof serviceData.serviceIconUrl === 'string' && serviceData.serviceIconUrl) {
+        // Gửi URL string để giữ nguyên ảnh cũ
+        formData.append('ServiceIconUrl', serviceData.serviceIconUrl);
+        // eslint-disable-next-line no-console
+        console.log('✅ ServiceService: Appending CURRENT icon URL to FormData:', serviceData.serviceIconUrl);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('⏭️ ServiceService: NO icon provided');
       }
+
+      // Debug FormData
+      // eslint-disable-next-line no-console
+      console.log('📋 ServiceService FormData keys:', Array.from(formData.keys()));
 
       const response = await apiClient.put<ApiResponse<ServiceResponse>>(
         SERVICE_ENDPOINTS.UPDATE(id),

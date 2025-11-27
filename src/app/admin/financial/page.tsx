@@ -1,43 +1,184 @@
 'use client';
 
+import type { AdminWalletPayout, PayoutStatus } from '@/types/wallet';
 import {
-  ArrowUpRight,
-  Building2,
-  CheckCircle,
+  AlertCircle,
+  Check,
+  CheckCircle2,
   Clock,
   CreditCard,
-  Download,
+  DollarSign,
   Eye,
+  Loader2,
   Search,
-  TrendingUp,
-  Wallet,
   X,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-import { mockPayments, mockPayoutRequests, mockWalletAccounts } from '@/libs/admin-data';
-
-type TabType = 'wallets' | 'payouts' | 'payments';
+import WalletService from '@/libs/WalletService';
 
 export default function FinancialPage() {
-  const [activeTab, setActiveTab] = useState<TabType>('wallets');
+  const [payouts, setPayouts] = useState<AdminWalletPayout[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<PayoutStatus | 'ALL'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const totalWalletBalance = mockWalletAccounts.reduce((sum, w) => sum + w.Balance, 0);
-  const pendingPayouts = mockPayoutRequests.filter(p => p.Status === 'Requested').length;
-  const completedPayments = mockPayments.filter(p => p.Status === 'Completed').length;
+  const [viewModal, setViewModal] = useState(false);
+  const [approveModal, setApproveModal] = useState(false);
+  const [markPaidModal, setMarkPaidModal] = useState(false);
+  const [rejectModal, setRejectModal] = useState(false);
+  const [selectedPayout, setSelectedPayout]
+    = useState<AdminWalletPayout | null>(null);
 
-  const tabs = [
-    { id: 'wallets' as const, label: 'Ví điện tử', icon: Wallet, count: mockWalletAccounts.length },
-    { id: 'payouts' as const, label: 'Rút tiền', icon: ArrowUpRight, count: pendingPayouts },
-    {
-      id: 'payments' as const,
-      label: 'Thanh toán',
-      icon: CreditCard,
-      count: completedPayments,
-    },
-  ];
+  const [approvePurpose, setApprovePurpose] = useState('Rút ví EZYFIX');
+  const [proofNote, setProofNote] = useState('');
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
+
+  const [isApproving, setIsApproving] = useState(false);
+  const [isMarkingPaid, setIsMarkingPaid] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+
+  const [approvePurposeError, setApprovePurposeError] = useState(false);
+  const [rejectReasonError, setRejectReasonError] = useState(false);
+
+  const fetchPayouts = async () => {
+    try {
+      setIsLoading(true);
+      const params: any = {
+        page: currentPage,
+        pageSize: 20,
+      };
+
+      if (statusFilter !== 'ALL') {
+        params.status = statusFilter;
+      }
+
+      const response = await WalletService.getAllPayouts(params);
+      setPayouts(response.items);
+      setTotalPages(response.meta.total_pages);
+      setTotalItems(response.meta.total_items);
+    } catch (error) {
+      console.error('Error fetching payouts:', error);
+      toast.error('Có lỗi xảy ra khi tải dữ liệu');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayouts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, statusFilter]);
+
+  const filteredPayouts = payouts.filter(
+    payout =>
+      payout.technicianName.toLowerCase().includes(searchTerm.toLowerCase())
+      || payout.technicianEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      || payout.receiverAccount.includes(searchTerm),
+  );
+
+  const stats = {
+    totalPending: payouts.filter(p => p.status === 'PENDING').length,
+    totalApproved: payouts.filter(p => p.status === 'APPROVED').length,
+    totalPaid: payouts.filter(p => p.status === 'PAID').length,
+    totalRejected: payouts.filter(p => p.status === 'REJECTED').length,
+    totalAmount: payouts.reduce((sum, p) => sum + p.amount, 0),
+  };
+
+  const handleViewPayout = (payout: AdminWalletPayout) => {
+    setSelectedPayout(payout);
+    setViewModal(true);
+  };
+
+  const handleApproveClick = (payout: AdminWalletPayout) => {
+    setSelectedPayout(payout);
+    setApprovePurpose('Rút ví EZYFIX');
+    setApprovePurposeError(false);
+    setApproveModal(true);
+  };
+
+  const handleApprove = async () => {
+    if (!approvePurpose.trim()) {
+      setApprovePurposeError(true);
+      return;
+    }
+
+    try {
+      setIsApproving(true);
+      await WalletService.approvePayout(selectedPayout!.payoutRequestId, {
+        purpose: approvePurpose,
+      });
+      toast.success('Đã duyệt yêu cầu rút tiền thành công');
+      setApproveModal(false);
+      fetchPayouts();
+    } catch (error: any) {
+      console.error('Error approving payout:', error);
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt yêu cầu');
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleMarkPaidClick = (payout: AdminWalletPayout) => {
+    setSelectedPayout(payout);
+    setProofNote('');
+    setReferenceNumber('');
+    setMarkPaidModal(true);
+  };
+
+  const handleMarkPaid = async () => {
+    try {
+      setIsMarkingPaid(true);
+      await WalletService.markPaid(selectedPayout!.payoutRequestId, {
+        proofNote: proofNote.trim() || undefined,
+        referenceNumber: referenceNumber.trim() || undefined,
+      });
+      toast.success('Đã đánh dấu là đã chuyển tiền');
+      setMarkPaidModal(false);
+      fetchPayouts();
+    } catch (error: any) {
+      console.error('Error marking paid:', error);
+      toast.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setIsMarkingPaid(false);
+    }
+  };
+
+  const handleRejectClick = (payout: AdminWalletPayout) => {
+    setSelectedPayout(payout);
+    setRejectReason('');
+    setRejectReasonError(false);
+    setRejectModal(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      setRejectReasonError(true);
+      return;
+    }
+
+    try {
+      setIsRejecting(true);
+      await WalletService.rejectPayout(selectedPayout!.payoutRequestId, {
+        reason: rejectReason,
+      });
+      toast.success('Đã từ chối yêu cầu rút tiền');
+      setRejectModal(false);
+      fetchPayouts();
+    } catch (error: any) {
+      console.error('Error rejecting payout:', error);
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối yêu cầu');
+    } finally {
+      setIsRejecting(false);
+    }
+  };
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('vi-VN', {
@@ -45,461 +186,813 @@ export default function FinancialPage() {
       currency: 'VND',
     }).format(amount);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
+
+  const getStatusBadge = (status: PayoutStatus) => {
+    const statusConfig = {
+      PENDING: {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-800',
+        label: 'Chờ duyệt',
+        icon: Clock,
+      },
+      APPROVED: {
+        bg: 'bg-blue-100',
+        text: 'text-blue-800',
+        label: 'Đã duyệt',
+        icon: CheckCircle2,
+      },
+      PAID: {
+        bg: 'bg-green-100',
+        text: 'text-green-800',
+        label: 'Đã chuyển',
+        icon: Check,
+      },
+      REJECTED: {
+        bg: 'bg-red-100',
+        text: 'text-red-800',
+        label: 'Từ chối',
+        icon: XCircle,
+      },
+    };
+
+    const config = statusConfig[status];
+    const Icon = config.icon;
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${config.bg} ${config.text}`}
+      >
+        <Icon className="size-3" />
+        {config.label}
+      </span>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Quản lý tài chính</h2>
-          <p className="mt-1 text-sm text-gray-600">Quản lý ví, rút tiền và thanh toán</p>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Quản lý tài chính
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Quản lý yêu cầu rút tiền từ thợ sửa chữa
+          </p>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md"
-        >
-          <Download className="h-4 w-4" />
-          Xuất báo cáo
-        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+      {/* Stats Cards */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Tổng số dư ví</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {formatCurrency(totalWalletBalance)}
+              <p className="text-xs text-gray-600">Chờ duyệt</p>
+              <p className="mt-1 text-2xl font-bold text-yellow-600">
+                {stats.totalPending}
               </p>
-              <div className="mt-2 flex items-center gap-1 text-sm text-green-600">
-                <TrendingUp className="h-3 w-3" />
-                <span>+15.3% tháng này</span>
-              </div>
             </div>
-            <div className="rounded-full bg-blue-50 p-3">
-              <Wallet className="h-6 w-6 text-blue-600" />
-            </div>
+            <Clock className="h-10 w-10 text-yellow-500" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-600" />
         </div>
 
-        <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Yêu cầu rút tiền</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{pendingPayouts}</p>
-              <p className="mt-2 text-sm text-gray-500">Đang chờ duyệt</p>
+              <p className="text-xs text-gray-600">Đã duyệt</p>
+              <p className="mt-1 text-2xl font-bold text-blue-600">
+                {stats.totalApproved}
+              </p>
             </div>
-            <div className="rounded-full bg-orange-50 p-3">
-              <ArrowUpRight className="h-6 w-6 text-orange-600" />
-            </div>
+            <CheckCircle2 className="h-10 w-10 text-blue-500" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-orange-500 to-orange-600" />
         </div>
 
-        <div className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Thanh toán hoàn thành</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{completedPayments}</p>
-              <p className="mt-2 text-sm text-gray-500">Giao dịch thành công</p>
+              <p className="text-xs text-gray-600">Đã chuyển</p>
+              <p className="mt-1 text-2xl font-bold text-green-600">
+                {stats.totalPaid}
+              </p>
             </div>
-            <div className="rounded-full bg-green-50 p-3">
-              <CreditCard className="h-6 w-6 text-green-600" />
-            </div>
+            <CreditCard className="h-10 w-10 text-green-500" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-green-500 to-green-600" />
+        </div>
+
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-600">Từ chối</p>
+              <p className="mt-1 text-2xl font-bold text-red-600">
+                {stats.totalRejected}
+              </p>
+            </div>
+            <XCircle className="h-10 w-10 text-red-500" />
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-600">Tổng giá trị</p>
+              <p className="mt-1 text-xl font-bold text-purple-600">
+                {formatCurrency(stats.totalAmount)}
+              </p>
+            </div>
+            <DollarSign className="h-10 w-10 text-purple-500" />
+          </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex border-b border-gray-200">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex flex-1 items-center justify-center gap-3 px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span>{tab.label}</span>
-                <span
-                  className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  {tab.count}
-                </span>
-                {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-600" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search */}
-        <div className="border-b border-gray-200 bg-gray-50 p-4">
-          <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+      {/* Filters & Search */}
+      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="relative flex-1">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" />
             <input
+              className="w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+              placeholder="Tìm theo tên thợ, email, số tài khoản..."
               type="text"
-              placeholder="Tìm kiếm..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
             />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {(['ALL', 'PENDING', 'APPROVED', 'PAID', 'REJECTED'] as const).map(
+              status => (
+                <button
+                  key={status}
+                  className={`rounded-lg px-4 py-2 text-xs font-medium transition-all ${
+                    statusFilter === status
+                      ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                  }`}
+                  type="button"
+                  onClick={() => setStatusFilter(status)}
+                >
+                  {status === 'ALL'
+                    ? 'Tất cả'
+                    : status === 'PENDING'
+                      ? 'Chờ duyệt'
+                      : status === 'APPROVED'
+                        ? 'Đã duyệt'
+                        : status === 'PAID'
+                          ? 'Đã chuyển'
+                          : 'Từ chối'}
+                </button>
+              ),
+            )}
           </div>
         </div>
       </div>
 
-      {/* Content based on active tab */}
-      {activeTab === 'wallets' && (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Thợ sửa chữa
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Số dư
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Tiền tệ
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Cập nhật
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Hành động
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {mockWalletAccounts.map(wallet => (
-                  <tr key={wallet.WalletAccountID} className="transition-colors hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white">
-                          {wallet.TechnicianName?.[0] || 'T'}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">
-                            {wallet.TechnicianName || 'Unknown'}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            ID:
-                            {' '}
-                            {wallet.TechnicianID.slice(0, 8)}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-lg font-bold text-gray-900">
-                        {formatCurrency(wallet.Balance)}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                        {wallet.CurrencyCode}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {wallet.Status === 'Active'
-                        ? (
-                            <div className="flex items-center gap-1.5 text-green-600">
-                              <CheckCircle className="h-4 w-4" />
-                              <span className="text-sm font-medium">Hoạt động</span>
+      {/* Payouts Table */}
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        {isLoading
+          ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="size-8 animate-spin text-blue-600" />
+                <span className="ml-3 text-sm text-gray-600">
+                  Đang tải dữ liệu...
+                </span>
+              </div>
+            )
+          : filteredPayouts.length === 0
+            ? (
+                <div className="py-20 text-center text-gray-500">
+                  <p className="text-sm font-medium">
+                    Không tìm thấy yêu cầu rút tiền nào
+                  </p>
+                </div>
+              )
+            : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b border-gray-200 bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                          Thợ sửa chữa
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                          Thông tin nhận tiền
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                          Số tiền
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                          Trạng thái
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                          Ngày yêu cầu
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
+                          Thao tác
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {filteredPayouts.map(payout => (
+                        <tr
+                          key={payout.payoutRequestId}
+                          className="transition-colors hover:bg-gray-50"
+                        >
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {payout.technicianName}
                             </div>
-                          )
-                        : (
-                            <div className="flex items-center gap-1.5 text-red-600">
-                              <XCircle className="h-4 w-4" />
-                              <span className="text-sm font-medium">Tạm khóa</span>
+                            <div className="text-xs text-gray-500">
+                              {payout.technicianEmail}
                             </div>
-                          )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">
-                        {new Date(wallet.UpdatedDate).toLocaleDateString('vi-VN')}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                      >
-                        Chi tiết
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {payout.receiverName}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {payout.receiverAccount}
+                              {' '}
+                              (
+                              {payout.bankCode}
+                              )
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-semibold text-gray-900">
+                              {formatCurrency(payout.amount)}
+                            </div>
+                            {payout.holdAmount > 0 && (
+                              <div className="text-xs text-gray-500">
+                                Giữ:
+                                {' '}
+                                {formatCurrency(payout.holdAmount)}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            {getStatusBadge(payout.status)}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-gray-600">
+                            {formatDate(payout.requestedAt)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                className="rounded-md p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                                title="Xem chi tiết"
+                                type="button"
+                                onClick={() => handleViewPayout(payout)}
+                              >
+                                <Eye className="size-4" />
+                              </button>
+
+                              {payout.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    className="rounded-md p-2 text-green-600 transition-colors hover:bg-green-50 hover:text-green-700"
+                                    title="Duyệt"
+                                    type="button"
+                                    onClick={() => handleApproveClick(payout)}
+                                  >
+                                    <Check className="size-4" />
+                                  </button>
+                                  <button
+                                    className="rounded-md p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                    title="Từ chối"
+                                    type="button"
+                                    onClick={() => handleRejectClick(payout)}
+                                  >
+                                    <X className="size-4" />
+                                  </button>
+                                </>
+                              )}
+
+                              {payout.status === 'APPROVED' && (
+                                <>
+                                  <button
+                                    className="rounded-md p-2 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                    title="Đã chuyển tiền"
+                                    type="button"
+                                    onClick={() => handleMarkPaidClick(payout)}
+                                  >
+                                    <Check className="size-4" />
+                                  </button>
+                                  <button
+                                    className="rounded-md p-2 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+                                    title="Từ chối"
+                                    type="button"
+                                    onClick={() => handleRejectClick(payout)}
+                                  >
+                                    <X className="size-4" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-5 py-4">
+            <div className="text-sm text-gray-600">
+              Hiển thị
+              {' '}
+              <span className="font-semibold text-gray-900">
+                {filteredPayouts.length}
+              </span>
+              {' '}
+              /
+              {' '}
+              <span className="font-semibold text-gray-900">{totalItems}</span>
+              {' '}
+              yêu cầu
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={currentPage === 1}
+                type="button"
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                Trước
+              </button>
+              <button
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={currentPage === totalPages}
+                type="button"
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* View Modal */}
+      {viewModal && selectedPayout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Chi tiết yêu cầu rút tiền
+              </h2>
+              <button
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                type="button"
+                onClick={() => setViewModal(false)}
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <div className="text-sm font-medium text-gray-600">
+                  Trạng thái
+                </div>
+                <div className="mt-2">
+                  {getStatusBadge(selectedPayout.status)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">
+                    Tên thợ
+                  </div>
+                  <div className="mt-1 text-gray-900">
+                    {selectedPayout.technicianName}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-600">
+                    Email
+                  </div>
+                  <div className="mt-1 text-gray-900">
+                    {selectedPayout.technicianEmail}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-blue-50 p-4">
+                <h3 className="mb-3 font-semibold text-blue-900">
+                  Thông tin nhận tiền
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm font-medium text-blue-700">
+                      Tên tài khoản
+                    </div>
+                    <div className="mt-1 text-blue-900">
+                      {selectedPayout.receiverName}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-blue-700">
+                      Số tài khoản
+                    </div>
+                    <div className="mt-1 text-blue-900">
+                      {selectedPayout.receiverAccount}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-blue-700">
+                      Ngân hàng
+                    </div>
+                    <div className="mt-1 text-blue-900">
+                      {selectedPayout.bankCode}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">
+                    Số tiền rút
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-blue-600">
+                    {formatCurrency(selectedPayout.amount)}
+                  </div>
+                </div>
+                {selectedPayout.holdAmount > 0 && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-600">
+                      Số tiền đang giữ
+                    </div>
+                    <div className="mt-1 text-2xl font-bold text-orange-600">
+                      {formatCurrency(selectedPayout.holdAmount)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-600">
+                    Ngày yêu cầu
+                  </div>
+                  <div className="mt-1 text-gray-900">
+                    {formatDate(selectedPayout.requestedAt)}
+                  </div>
+                </div>
+                {selectedPayout.approvedAt && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-600">
+                      Ngày duyệt
+                    </div>
+                    <div className="mt-1 text-gray-900">
+                      {formatDate(selectedPayout.approvedAt)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {selectedPayout.note && (
+                <div>
+                  <div className="text-sm font-medium text-gray-600">
+                    Ghi chú
+                  </div>
+                  <div className="mt-1 text-gray-900">
+                    {selectedPayout.note}
+                  </div>
+                </div>
+              )}
+
+              {selectedPayout.vietQrImageBase64 && (
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <h3 className="mb-3 font-semibold text-gray-900">
+                    Mã QR chuyển khoản
+                  </h3>
+                  <div className="flex justify-center">
+                    <Image
+                      alt="VietQR"
+                      className="rounded-lg border-2 border-gray-200"
+                      height={300}
+                      src={`data:image/png;base64,${selectedPayout.vietQrImageBase64}`}
+                      width={300}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                className="rounded-lg bg-gray-200 px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-300"
+                type="button"
+                onClick={() => setViewModal(false)}
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {activeTab === 'payouts' && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {mockPayoutRequests.map(payout => (
-            <div
-              key={payout.PayoutRequestID}
-              className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
-            >
-              {/* Header */}
-              <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-lg font-bold text-white">
-                      {payout.TechnicianName?.[0] || 'T'}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{payout.TechnicianName}</h3>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        {new Date(payout.RequestedAt).toLocaleString('vi-VN', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                      payout.Status === 'Requested'
-                        ? 'bg-orange-100 text-orange-700'
-                        : payout.Status === 'Completed'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {payout.Status === 'Requested'
-                      ? (
-                          <>
-                            <Clock className="h-3 w-3" />
-                            Chờ duyệt
-                          </>
-                        )
-                      : payout.Status === 'Completed'
-                        ? (
-                            <>
-                              <CheckCircle className="h-3 w-3" />
-                              Đã duyệt
-                            </>
-                          )
-                        : (
-                            <>
-                              <X className="h-3 w-3" />
-                              Từ chối
-                            </>
-                          )}
-                  </span>
+      {/* Approve Modal */}
+      {approveModal && selectedPayout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Duyệt yêu cầu rút tiền
+              </h2>
+              <button
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                type="button"
+                onClick={() => setApproveModal(false)}
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-lg bg-blue-50 p-4">
+                <div className="text-sm text-blue-700">Thợ sửa chữa</div>
+                <div className="font-semibold text-blue-900">
+                  {selectedPayout.technicianName}
+                </div>
+                <div className="mt-2 text-sm text-blue-700">Số tiền</div>
+                <div className="text-2xl font-bold text-blue-900">
+                  {formatCurrency(selectedPayout.amount)}
                 </div>
               </div>
 
-              {/* Body */}
-              <div className="p-5">
-                {/* Amount - Featured */}
-                <div className="mb-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-gray-600">Số tiền rút</p>
-                      <p className="mt-1 text-2xl font-bold text-gray-900">
-                        {formatCurrency(payout.Amount)}
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-blue-100 p-3">
-                      <Wallet className="h-6 w-6 text-blue-600" />
-                    </div>
-                  </div>
+              <div>
+                <div className="block text-sm font-medium text-gray-700">
+                  Mục đích chuyển tiền
+                  {' '}
+                  <span className="text-red-500">*</span>
                 </div>
-
-                {/* Details Grid */}
-                <div className="mb-4 space-y-2">
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Building2 className="h-4 w-4" />
-                      <span>Phương thức</span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">
-                      {payout.PayoutChannel === 'Bank' ? 'Chuyển khoản' : 'Ví điện tử'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <CreditCard className="h-4 w-4" />
-                      <span>Người nhận</span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">
-                      {payout.ReceiverName}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Eye className="h-4 w-4" />
-                      <span>Tài khoản</span>
-                    </div>
-                    <span className="font-mono text-sm font-medium text-gray-900">
-                      {payout.ReceiverAccount}
-                    </span>
-                  </div>
-
-                  {payout.BankCode && (
-                    <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Building2 className="h-4 w-4" />
-                        <span>Ngân hàng</span>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {payout.BankCode}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                {payout.Status === 'Requested'
-                  ? (
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Phê duyệt
-                        </button>
-                        <button
-                          type="button"
-                          className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Từ chối
-                        </button>
-                      </div>
-                    )
-                  : (
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                      >
-                        <Eye className="h-4 w-4" />
-                        Xem chi tiết
-                      </button>
-                    )}
-
-                {payout.Note && (
-                  <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                    <p className="text-xs font-medium text-gray-600">Ghi chú:</p>
-                    <p className="mt-1 text-sm text-gray-700">{payout.Note}</p>
-                  </div>
+                <input
+                  className={`mt-1 w-full rounded-lg border px-4 py-2.5 focus:ring-2 focus:outline-none ${
+                    approvePurposeError
+                      ? 'border-red-500 focus:ring-red-200'
+                      : 'border-gray-300 focus:ring-blue-200'
+                  }`}
+                  placeholder="Ví dụ: Rút ví EZYFIX"
+                  type="text"
+                  value={approvePurpose}
+                  onChange={(e) => {
+                    setApprovePurpose(e.target.value);
+                    setApprovePurposeError(false);
+                  }}
+                />
+                {approvePurposeError && (
+                  <p className="mt-1 text-sm text-red-500">
+                    Vui lòng nhập mục đích
+                  </p>
                 )}
               </div>
+
+              <div className="rounded-lg bg-yellow-50 p-4">
+                <div className="flex gap-2">
+                  <AlertCircle className="size-5 shrink-0 text-yellow-600" />
+                  <div className="text-sm text-yellow-800">
+                    Sau khi duyệt, hệ thống sẽ tạo mã QR VietQR để chuyển khoản
+                    cho thợ sửa chữa.
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+
+            <div className="mt-6 flex gap-3">
+              <button
+                className="flex-1 rounded-lg bg-gray-200 px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-300"
+                type="button"
+                onClick={() => setApproveModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-green-500 px-6 py-2.5 font-medium text-white hover:from-green-700 hover:to-green-600 disabled:opacity-50"
+                disabled={isApproving}
+                type="button"
+                onClick={handleApprove}
+              >
+                {isApproving
+                  ? (
+                      <>
+                        <Loader2 className="mr-2 inline size-4 animate-spin" />
+                        Đang xử lý...
+                      </>
+                    )
+                  : (
+                      'Duyệt'
+                    )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {activeTab === 'payments' && (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Mã thanh toán
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Số tiền
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Phương thức
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Trạng thái
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Ngày giao dịch
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Hành động
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {mockPayments.map(payment => (
-                  <tr key={payment.PaymentID} className="transition-colors hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <p className="font-mono text-sm font-medium text-gray-900">
-                        {payment.PaymentID.slice(0, 12)}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-gray-900">{formatCurrency(payment.Amount)}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                        {payment.PaymentMethodName || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {payment.Status === 'Completed'
-                        ? (
-                            <div className="flex items-center gap-1.5 text-green-600">
-                              <CheckCircle className="h-4 w-4" />
-                              <span className="text-sm font-medium">Thành công</span>
-                            </div>
-                          )
-                        : payment.Status === 'Pending'
-                          ? (
-                              <div className="flex items-center gap-1.5 text-orange-600">
-                                <Clock className="h-4 w-4" />
-                                <span className="text-sm font-medium">Đang xử lý</span>
-                              </div>
-                            )
-                          : (
-                              <div className="flex items-center gap-1.5 text-red-600">
-                                <XCircle className="h-4 w-4" />
-                                <span className="text-sm font-medium">Thất bại</span>
-                              </div>
-                            )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600">
-                        {new Date(payment.TransactionDate).toLocaleDateString('vi-VN')}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                      >
-                        Chi tiết
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Mark Paid Modal */}
+      {markPaidModal && selectedPayout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Xác nhận đã chuyển tiền
+              </h2>
+              <button
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                type="button"
+                onClick={() => setMarkPaidModal(false)}
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-lg bg-blue-50 p-4">
+                <div className="text-sm text-blue-700">Thợ sửa chữa</div>
+                <div className="font-semibold text-blue-900">
+                  {selectedPayout.technicianName}
+                </div>
+                <div className="mt-2 text-sm text-blue-700">Số tiền</div>
+                <div className="text-2xl font-bold text-blue-900">
+                  {formatCurrency(selectedPayout.amount)}
+                </div>
+              </div>
+
+              <div>
+                <div className="block text-sm font-medium text-gray-700">
+                  Ghi chú (tùy chọn)
+                </div>
+                <input
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                  placeholder="Ví dụ: Đã chuyển lúc 10:30"
+                  type="text"
+                  value={proofNote}
+                  onChange={e => setProofNote(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <div className="block text-sm font-medium text-gray-700">
+                  Mã tham chiếu (tùy chọn)
+                </div>
+                <input
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                  placeholder="Ví dụ: FT123456"
+                  type="text"
+                  value={referenceNumber}
+                  onChange={e => setReferenceNumber(e.target.value)}
+                />
+              </div>
+
+              <div className="rounded-lg bg-green-50 p-4">
+                <div className="flex gap-2">
+                  <CheckCircle2 className="size-5 shrink-0 text-green-600" />
+                  <div className="text-sm text-green-800">
+                    Hệ thống sẽ tự động trừ tiền trong ví của thợ và giải phóng
+                    holdAmount.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                className="flex-1 rounded-lg bg-gray-200 px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-300"
+                type="button"
+                onClick={() => setMarkPaidModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-2.5 font-medium text-white hover:from-blue-700 hover:to-blue-600 disabled:opacity-50"
+                disabled={isMarkingPaid}
+                type="button"
+                onClick={handleMarkPaid}
+              >
+                {isMarkingPaid
+                  ? (
+                      <>
+                        <Loader2 className="mr-2 inline size-4 animate-spin" />
+                        Đang xử lý...
+                      </>
+                    )
+                  : (
+                      'Xác nhận'
+                    )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {rejectModal && selectedPayout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Từ chối yêu cầu rút tiền
+              </h2>
+              <button
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                type="button"
+                onClick={() => setRejectModal(false)}
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-lg bg-red-50 p-4">
+                <div className="text-sm text-red-700">Thợ sửa chữa</div>
+                <div className="font-semibold text-red-900">
+                  {selectedPayout.technicianName}
+                </div>
+                <div className="mt-2 text-sm text-red-700">Số tiền</div>
+                <div className="text-2xl font-bold text-red-900">
+                  {formatCurrency(selectedPayout.amount)}
+                </div>
+              </div>
+
+              <div>
+                <div className="block text-sm font-medium text-gray-700">
+                  Lý do từ chối
+                  {' '}
+                  <span className="text-red-500">*</span>
+                </div>
+                <textarea
+                  className={`mt-1 w-full rounded-lg border px-4 py-2.5 focus:ring-2 focus:outline-none ${
+                    rejectReasonError
+                      ? 'border-red-500 focus:ring-red-200'
+                      : 'border-gray-300 focus:ring-blue-200'
+                  }`}
+                  placeholder="Ví dụ: Thông tin tài khoản không hợp lệ"
+                  rows={3}
+                  value={rejectReason}
+                  onChange={(e) => {
+                    setRejectReason(e.target.value);
+                    setRejectReasonError(false);
+                  }}
+                />
+                {rejectReasonError && (
+                  <p className="mt-1 text-sm text-red-500">
+                    Vui lòng nhập lý do từ chối
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-lg bg-yellow-50 p-4">
+                <div className="flex gap-2">
+                  <AlertCircle className="size-5 shrink-0 text-yellow-600" />
+                  <div className="text-sm text-yellow-800">
+                    Sau khi từ chối, holdAmount sẽ được giải phóng và thợ có thể
+                    tạo yêu cầu mới.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                className="flex-1 rounded-lg bg-gray-200 px-6 py-2.5 font-medium text-gray-700 hover:bg-gray-300"
+                type="button"
+                onClick={() => setRejectModal(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="flex-1 rounded-lg bg-gradient-to-r from-red-600 to-red-500 px-6 py-2.5 font-medium text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50"
+                disabled={isRejecting}
+                type="button"
+                onClick={handleReject}
+              >
+                {isRejecting
+                  ? (
+                      <>
+                        <Loader2 className="mr-2 inline size-4 animate-spin" />
+                        Đang xử lý...
+                      </>
+                    )
+                  : (
+                      'Từ chối'
+                    )}
+              </button>
+            </div>
           </div>
         </div>
       )}

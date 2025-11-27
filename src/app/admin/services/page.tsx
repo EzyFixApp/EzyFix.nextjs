@@ -62,6 +62,7 @@ export default function ServicesPage() {
     basePrice: 0,
     categoryId: '',
     serviceIconUrl: null as File | null,
+    keepCurrentIcon: true, // Flag để biết có giữ nguyên ảnh cũ không
   });
 
   // Handle view service
@@ -79,6 +80,7 @@ export default function ServicesPage() {
       basePrice: service.basePrice,
       categoryId: service.categoryId,
       serviceIconUrl: null,
+      keepCurrentIcon: true, // Mặc định giữ nguyên ảnh cũ
     });
     setEditModalOpen(true);
   };
@@ -134,10 +136,23 @@ export default function ServicesPage() {
     }
 
     try {
-      const updateData = {
-        ...editForm,
-        serviceIconUrl: editForm.serviceIconUrl || undefined,
+      // Chỉ gửi các field đã thay đổi
+      const updateData: any = {
+        categoryId: editForm.categoryId,
+        serviceName: editForm.serviceName,
+        description: editForm.description,
+        basePrice: editForm.basePrice,
       };
+
+      // Nếu có File mới → gửi File
+      // Nếu KHÔNG có File mới → gửi lại URL ảnh cũ để giữ nguyên
+      if (editForm.serviceIconUrl instanceof File) {
+        updateData.serviceIconUrl = editForm.serviceIconUrl;
+      } else if (selectedService.serviceIconUrl) {
+        // Gửi lại URL ảnh cũ
+        updateData.serviceIconUrl = selectedService.serviceIconUrl;
+      }
+
       await updateService(selectedService.id, updateData);
       setEditModalOpen(false);
       setSelectedService(null);
@@ -317,6 +332,9 @@ export default function ServicesPage() {
                               fill
                               className="object-cover"
                               sizes="64px"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                           </div>
                         )}
@@ -452,6 +470,9 @@ export default function ServicesPage() {
                         fill
                         className="object-cover"
                         sizes="128px"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   </div>
@@ -665,17 +686,51 @@ export default function ServicesPage() {
                   >
                     Service Icon (tùy chọn)
                   </label>
-                  <input
-                    id="createServiceIcon"
-                    type="file"
-                    accept="image/*"
-                    onChange={e =>
-                      setCreateForm({
-                        ...createForm,
-                        serviceIconUrl: e.target.files?.[0] || null,
-                      })}
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
-                  />
+
+                  {/* Preview Ảnh nếu đã chọn */}
+                  {createForm.serviceIconUrl && (
+                    <div className="mt-2">
+                      <div className="block text-sm font-medium text-gray-700">
+                        Hình ảnh hiện tại
+                      </div>
+                      <div className="relative mt-2 h-32 w-32 overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-50">
+                        <Image
+                          src={URL.createObjectURL(createForm.serviceIconUrl)}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                          sizes="128px"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nút upload */}
+                  <div className="mt-2">
+                    <label
+                      htmlFor="createServiceIcon"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      {createForm.serviceIconUrl
+                        ? 'Thay đổi hình ảnh dịch vụ'
+                        : 'Thêm hình ảnh dịch vụ'}
+                    </label>
+                    <input
+                      id="createServiceIcon"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCreateForm({
+                            ...createForm,
+                            serviceIconUrl: file,
+                          });
+                        }
+                      }}
+                      className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -735,6 +790,9 @@ export default function ServicesPage() {
                         fill
                         className="object-cover"
                         sizes="128px"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   </div>
@@ -757,7 +815,7 @@ export default function ServicesPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        setEditForm({ ...editForm, serviceIconUrl: file });
+                        setEditForm({ ...editForm, serviceIconUrl: file, keepCurrentIcon: false });
                       }
                     }}
                     className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
