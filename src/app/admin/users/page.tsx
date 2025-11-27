@@ -1,7 +1,6 @@
 'use client';
 
 import type {
-  DeleteUserRequest,
   GetUsersParams,
   ResetPasswordRequest,
   UpdateStatusRequest,
@@ -21,13 +20,11 @@ import {
   Power,
   Search,
   Shield,
-  Trash2,
   UserCheck,
   Users,
   Wrench,
   X,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -59,7 +56,6 @@ export default function UsersPage() {
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [verifyModal, setVerifyModal] = useState(false);
-  const [deleteModal, setDeleteModal] = useState(false);
   const [resetPasswordModal, setResetPasswordModal] = useState(false);
 
   // Selected user
@@ -71,8 +67,6 @@ export default function UsersPage() {
   const [statusReason, setStatusReason] = useState('');
   const [verifyStatus, setVerifyStatus] = useState(true);
   const [verifyNotes, setVerifyNotes] = useState('');
-  const [deleteReason, setDeleteReason] = useState('');
-  const [hardDelete, setHardDelete] = useState(false);
   const [resetReason, setResetReason] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
 
@@ -80,12 +74,24 @@ export default function UsersPage() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
   // Validation errors
   const [statusReasonError, setStatusReasonError] = useState(false);
-  const [deleteReasonError, setDeleteReasonError] = useState(false);
+
+  // Helper function to check if avatar URL is valid
+  const isValidAvatarUrl = (url: string | null | undefined): boolean => {
+    if (!url) {
+      return false;
+    }
+    try {
+      const urlObj = new URL(url);
+      // Check if domain exists and is not cdn.ezyfix.site (which doesn't resolve)
+      return !urlObj.hostname.includes('cdn.ezyfix.site');
+    } catch {
+      return false;
+    }
+  };
 
   // Fetch users
   const fetchUsers = async () => {
@@ -219,44 +225,6 @@ export default function UsersPage() {
       toast.error('Không thể cập nhật trạng thái xác thực');
     } finally {
       setIsVerifying(false);
-    }
-  };
-
-  // Handle delete user
-  const handleDelete = (user: User) => {
-    setSelectedUser(user);
-    setDeleteReason('');
-    setHardDelete(false);
-    setDeleteReasonError(false);
-    setDeleteModal(true);
-  };
-
-  const submitDelete = async () => {
-    if (!selectedUser || !deleteReason.trim()) {
-      setDeleteReasonError(true);
-      toast.error('Vui lòng nhập lý do');
-      return;
-    }
-
-    setDeleteReasonError(false);
-
-    try {
-      setIsDeleting(true);
-      const request: DeleteUserRequest = {
-        reason: deleteReason.trim(),
-        deleteRelatedData: false,
-      };
-
-      await UserService.deleteUser(selectedUser.userId, request, hardDelete);
-      toast.success(`Đã xóa người dùng ${hardDelete ? 'vĩnh viễn' : 'thành công'}`);
-      setDeleteModal(false);
-      setSelectedUser(null);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      toast.error('Không thể xóa người dùng');
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -523,18 +491,24 @@ export default function UsersPage() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0">
-                                {user.avatarLink
+                                {user.avatarLink && isValidAvatarUrl(user.avatarLink)
                                   ? (
-                                      <Image
-                                        width={40}
-                                        height={40}
+                                      <img
                                         className="h-10 w-10 rounded-full object-cover"
                                         src={user.avatarLink}
                                         alt={user.fullName || 'User'}
+                                        onError={(e) => {
+                                          const target = e.currentTarget;
+                                          target.style.display = 'none';
+                                          const fallback = document.createElement('div');
+                                          fallback.className = 'flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-medium';
+                                          fallback.textContent = user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U';
+                                          target.parentElement?.appendChild(fallback);
+                                        }}
                                       />
                                     )
                                   : (
-                                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-medium text-blue-600">
                                         {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                                       </div>
                                     )}
@@ -593,14 +567,6 @@ export default function UsersPage() {
                               >
                                 <Eye className="h-5 w-5" />
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateStatus(user)}
-                                className="rounded p-1 text-green-600 transition-colors hover:bg-green-50"
-                                title={user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                              >
-                                <Power className="h-5 w-5" />
-                              </button>
                               {!user.isVerify && (
                                 <button
                                   type="button"
@@ -621,11 +587,15 @@ export default function UsersPage() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => handleDelete(user)}
-                                className="rounded p-1 text-red-600 transition-colors hover:bg-red-50"
-                                title="Xóa người dùng"
+                                onClick={() => handleUpdateStatus(user)}
+                                className={`rounded p-1 transition-colors ${
+                                  user.isActive
+                                    ? 'text-red-600 hover:bg-red-50'
+                                    : 'text-green-600 hover:bg-green-50'
+                                }`}
+                                title={user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt lại'}
                               >
-                                <Trash2 className="h-5 w-5" />
+                                <Power className="h-5 w-5" />
                               </button>
                             </div>
                           </td>
@@ -690,14 +660,20 @@ export default function UsersPage() {
                           <h3 className="mb-4 text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div className="flex items-center gap-3">
-                              {userDetails.avatarLink
+                              {userDetails.avatarLink && isValidAvatarUrl(userDetails.avatarLink)
                                 ? (
-                                    <Image
-                                      width={64}
-                                      height={64}
+                                    <img
                                       src={userDetails.avatarLink}
                                       alt={userDetails.fullName || 'User'}
                                       className="h-16 w-16 rounded-full object-cover"
+                                      onError={(e) => {
+                                        const target = e.currentTarget;
+                                        target.style.display = 'none';
+                                        const fallback = document.createElement('div');
+                                        fallback.className = 'flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600';
+                                        fallback.textContent = userDetails.fullName ? userDetails.fullName.charAt(0).toUpperCase() : 'U';
+                                        target.parentElement?.appendChild(fallback);
+                                      }}
                                     />
                                   )
                                 : (
@@ -1047,97 +1023,6 @@ export default function UsersPage() {
                       )
                     : (
                         'Xác thực'
-                      )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Modal */}
-      {deleteModal && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-200 px-8 py-6">
-              <h2 className="text-2xl font-bold text-gray-800">Xóa người dùng</h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setDeleteModal(false);
-                  setSelectedUser(null);
-                }}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="mb-4 rounded-lg bg-red-50 p-4">
-                <p className="text-sm text-red-800">
-                  ⚠️ Hành động này không thể hoàn tác. Bạn có chắc muốn xóa người dùng
-                  {' '}
-                  <span className="font-medium">{selectedUser.fullName}</span>
-                  ?
-                </p>
-              </div>
-              <div className="mb-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={hardDelete}
-                    onChange={e => setHardDelete(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Xóa vĩnh viễn (không thể khôi phục)</span>
-                </label>
-              </div>
-              <div className="mb-4">
-                <label htmlFor="delete-reason" className="mb-2 block text-sm font-medium text-gray-700">Lý do *</label>
-                <textarea
-                  id="delete-reason"
-                  value={deleteReason}
-                  onChange={(e) => {
-                    setDeleteReason(e.target.value);
-                    if (e.target.value.trim()) {
-                      setDeleteReasonError(false);
-                    }
-                  }}
-                  rows={3}
-                  className={`w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none ${
-                    deleteReasonError
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                  }`}
-                  placeholder="Nhập lý do xóa..."
-                />
-                {deleteReasonError && (
-                  <p className="mt-1 text-sm text-red-600">Vui lòng nhập lý do</p>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDeleteModal(false);
-                    setSelectedUser(null);
-                  }}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  onClick={submitDelete}
-                  disabled={isDeleting}
-                  className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-                >
-                  {isDeleting
-                    ? (
-                        <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                      )
-                    : (
-                        'Xóa'
                       )}
                 </button>
               </div>
