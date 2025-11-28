@@ -51,6 +51,7 @@ export type ApprovePayoutRequest = {
 };
 
 export type MarkPaidRequest = {
+  proofImageUrl?: string;
   proofNote?: string;
   referenceNumber?: string;
 };

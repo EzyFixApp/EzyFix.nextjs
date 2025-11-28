@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import UploadService from '@/libs/UploadService';
 import WalletService from '@/libs/WalletService';
 
 export default function FinancialPage() {
@@ -40,6 +41,8 @@ export default function FinancialPage() {
   const [proofNote, setProofNote] = useState('');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [rejectReason, setRejectReason] = useState('');
+  const [billImage, setBillImage] = useState<File | null>(null);
+  const [billImagePreview, setBillImagePreview] = useState<string>('');
 
   const [isApproving, setIsApproving] = useState(false);
   const [isMarkingPaid, setIsMarkingPaid] = useState(false);
@@ -47,6 +50,7 @@ export default function FinancialPage() {
 
   const [approvePurposeError, setApprovePurposeError] = useState(false);
   const [rejectReasonError, setRejectReasonError] = useState(false);
+  const [billImageError, setBillImageError] = useState(false);
 
   const fetchPayouts = async () => {
     try {
@@ -112,15 +116,42 @@ export default function FinancialPage() {
 
     try {
       setIsApproving(true);
-      await WalletService.approvePayout(selectedPayout!.payoutRequestId, {
+      const result = await WalletService.approvePayout(selectedPayout!.payoutRequestId, {
         purpose: approvePurpose,
       });
       toast.success('Đã duyệt yêu cầu rút tiền thành công');
+      // Cập nhật payout với QR code
+      setSelectedPayout(result);
       setApproveModal(false);
       fetchPayouts();
     } catch (error: any) {
       console.error('Error approving payout:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi duyệt yêu cầu');
+
+      // Handle specific backend errors
+      const errorResponse = error.response?.data;
+      const exceptionMessage = errorResponse?.data?.exceptionMessage;
+
+      if (exceptionMessage) {
+        const errorCode = exceptionMessage.toUpperCase();
+
+        if (errorCode.includes('INVALID_STATUS')) {
+          toast.error('Trạng thái payout không hợp lệ để duyệt');
+        } else if (errorCode.includes('NOT_FOUND')) {
+          toast.error('Không tìm thấy yêu cầu rút tiền này');
+        } else if (errorCode.includes('ALREADY_APPROVED')) {
+          toast.error('Yêu cầu này đã được duyệt rồi');
+        } else if (errorCode.includes('UNAUTHORIZED')) {
+          toast.error('Bạn không có quyền thực hiện thao tác này');
+        } else {
+          toast.error(exceptionMessage);
+        }
+      } else if (errorResponse?.reason && errorResponse.reason !== 'Internal server error') {
+        toast.error(errorResponse.reason);
+      } else if (errorResponse?.message) {
+        toast.error(errorResponse.message);
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra khi duyệt yêu cầu');
+      }
     } finally {
       setIsApproving(false);
     }
@@ -130,22 +161,68 @@ export default function FinancialPage() {
     setSelectedPayout(payout);
     setProofNote('');
     setReferenceNumber('');
+    setBillImage(null);
+    setBillImagePreview('');
+    setBillImageError(false);
     setMarkPaidModal(true);
   };
 
   const handleMarkPaid = async () => {
+    if (!billImage) {
+      setBillImageError(true);
+      toast.error('Vui lòng upload ảnh bill chuyển tiền');
+      return;
+    }
+
     try {
       setIsMarkingPaid(true);
+
+      // Upload bill image to backend using /api/v1/media
+      toast.info('Đang upload ảnh bill...');
+      const billUrl = await UploadService.uploadPayoutBillImage(billImage);
+
+      // Mark as paid with the uploaded bill URL
       await WalletService.markPaid(selectedPayout!.payoutRequestId, {
+        proofImageUrl: billUrl,
         proofNote: proofNote.trim() || undefined,
         referenceNumber: referenceNumber.trim() || undefined,
       });
+
       toast.success('Đã đánh dấu là đã chuyển tiền');
       setMarkPaidModal(false);
       fetchPayouts();
     } catch (error: any) {
       console.error('Error marking paid:', error);
-      toast.error(error.message || 'Có lỗi xảy ra');
+
+      // Handle specific backend errors
+      const errorResponse = error.response?.data;
+
+      // Check for specific error in data.exceptionMessage
+      const exceptionMessage = errorResponse?.data?.exceptionMessage;
+
+      if (exceptionMessage) {
+        const errorCode = exceptionMessage.toUpperCase();
+
+        if (errorCode.includes('INSUFFICIENT_BALANCE')) {
+          toast.error('Không đủ số dư trong ví để thực hiện thanh toán');
+        } else if (errorCode.includes('INVALID_STATUS')) {
+          toast.error('Trạng thái payout không hợp lệ để đánh dấu đã thanh toán');
+        } else if (errorCode.includes('NOT_FOUND')) {
+          toast.error('Không tìm thấy yêu cầu rút tiền này');
+        } else if (errorCode.includes('UNAUTHORIZED')) {
+          toast.error('Bạn không có quyền thực hiện thao tác này');
+        } else if (errorCode.includes('ALREADY_PAID')) {
+          toast.error('Yêu cầu này đã được đánh dấu là đã thanh toán rồi');
+        } else {
+          toast.error(exceptionMessage);
+        }
+      } else if (errorResponse?.reason && errorResponse.reason !== 'Internal server error') {
+        toast.error(errorResponse.reason);
+      } else if (errorResponse?.message) {
+        toast.error(errorResponse.message);
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra khi đánh dấu đã thanh toán');
+      }
     } finally {
       setIsMarkingPaid(false);
     }
@@ -174,7 +251,32 @@ export default function FinancialPage() {
       fetchPayouts();
     } catch (error: any) {
       console.error('Error rejecting payout:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi từ chối yêu cầu');
+
+      // Handle specific backend errors
+      const errorResponse = error.response?.data;
+      const exceptionMessage = errorResponse?.data?.exceptionMessage;
+
+      if (exceptionMessage) {
+        const errorCode = exceptionMessage.toUpperCase();
+
+        if (errorCode.includes('INVALID_STATUS')) {
+          toast.error('Trạng thái payout không hợp lệ để từ chối');
+        } else if (errorCode.includes('NOT_FOUND')) {
+          toast.error('Không tìm thấy yêu cầu rút tiền này');
+        } else if (errorCode.includes('ALREADY_REJECTED')) {
+          toast.error('Yêu cầu này đã bị từ chối rồi');
+        } else if (errorCode.includes('UNAUTHORIZED')) {
+          toast.error('Bạn không có quyền thực hiện thao tác này');
+        } else {
+          toast.error(exceptionMessage);
+        }
+      } else if (errorResponse?.reason && errorResponse.reason !== 'Internal server error') {
+        toast.error(errorResponse.reason);
+      } else if (errorResponse?.message) {
+        toast.error(errorResponse.message);
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra khi từ chối yêu cầu');
+      }
     } finally {
       setIsRejecting(false);
     }
@@ -857,6 +959,77 @@ export default function FinancialPage() {
                   value={referenceNumber}
                   onChange={e => setReferenceNumber(e.target.value)}
                 />
+              </div>
+
+              <div>
+                <div className="block text-sm font-medium text-gray-700">
+                  Ảnh bill chuyển tiền
+                  {' '}
+                  <span className="text-red-500">*</span>
+                </div>
+                <div className="mt-2 max-h-80 overflow-y-auto">
+                  {billImagePreview
+                    ? (
+                        <div className="relative">
+                          <Image
+                            src={billImagePreview}
+                            alt="Bill preview"
+                            width={400}
+                            height={300}
+                            className="w-full rounded-lg border-2 border-gray-300"
+                            unoptimized
+                          />
+                          <button
+                            className="sticky top-2 right-2 float-right rounded-full bg-red-500 p-2 text-white shadow-lg hover:bg-red-600"
+                            type="button"
+                            onClick={() => {
+                              setBillImage(null);
+                              setBillImagePreview('');
+                              setBillImageError(false);
+                            }}
+                          >
+                            <X className="size-4" />
+                          </button>
+                        </div>
+                      )
+                    : (
+                        <button
+                          type="button"
+                          className={`w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+                            billImageError
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                          }`}
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = (e: any) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setBillImage(file);
+                                setBillImagePreview(URL.createObjectURL(file));
+                                setBillImageError(false);
+                              }
+                            };
+                            input.click();
+                          }}
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <CreditCard className={`size-12 ${billImageError ? 'text-red-400' : 'text-gray-400'}`} />
+                            <div className={`text-sm ${billImageError ? 'text-red-600' : 'text-gray-600'}`}>
+                              {billImageError ? 'Vui lòng chọn ảnh bill' : 'Click để chọn ảnh bill'}
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                </div>
+                {billImageError && (
+                  <div className="mt-2 flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle className="size-4" />
+                    Bắt buộc phải upload ảnh bill chuyển tiền
+                  </div>
+                )}
               </div>
 
               <div className="rounded-lg bg-green-50 p-4">
