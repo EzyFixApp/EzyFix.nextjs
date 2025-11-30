@@ -30,22 +30,22 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
   }, [isLoading, isAuthenticated, pathname, router]);
 
-  // Show loading spinner while checking auth
-  if (isLoading) {
+  // Always show loading first to prevent flash of dashboard content
+  // Show loading spinner while checking auth OR during redirect
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="text-center">
           <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-[#609CEF]" />
-          <p className="text-lg font-medium text-gray-700">Loading...</p>
-          <p className="mt-2 text-sm text-gray-500">Authenticating your access</p>
+          <p className="text-lg font-medium text-gray-700">
+            {isLoading ? 'Loading...' : 'Redirecting...'}
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            {isLoading ? 'Authenticating your access' : 'Please wait'}
+          </p>
         </div>
       </div>
     );
-  }
-
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return null;
   }
 
   // Check role-based access BEFORE rendering children

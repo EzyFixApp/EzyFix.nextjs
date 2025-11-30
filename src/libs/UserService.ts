@@ -23,6 +23,8 @@ import type {
 
 import axios from 'axios';
 
+import { getAccessToken } from '@/utils/storage';
+
 // Create a separate axios instance for user APIs (no /v1 prefix)
 const userApiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ezyfix.up.railway.app'}/api`,
@@ -35,7 +37,7 @@ const userApiClient = axios.create({
 // Add auth token interceptor
 userApiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('ezyfix_admin_token');
+    const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

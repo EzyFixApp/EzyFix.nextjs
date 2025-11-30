@@ -16,6 +16,8 @@ import type {
 
 import axios from 'axios';
 
+import { getAccessToken } from '@/utils/storage';
+
 // Create a separate axios instance for dispute APIs (no /v1 prefix)
 const disputeApiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ezyfix.up.railway.app'}/api`,
@@ -28,7 +30,7 @@ const disputeApiClient = axios.create({
 // Add auth token interceptor
 disputeApiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('ezyfix_admin_token');
+    const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

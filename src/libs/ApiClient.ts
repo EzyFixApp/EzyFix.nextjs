@@ -14,13 +14,20 @@ import type { ApiError, ApiResponse } from '@/types/api';
 
 import axios from 'axios';
 
+import {
+  clearAllAuthData,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+} from '@/utils/storage';
+
 // ========================================
 // Configuration
 // ========================================
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ezyfix.up.railway.app';
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 const API_TIMEOUT = Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 30000;
-const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'ezyfix_admin_token';
 
 // Enable logging in development
 const ENABLE_LOGGING = process.env.NEXT_PUBLIC_ENABLE_API_LOGGING === 'true';
@@ -42,9 +49,9 @@ const apiClient: AxiosInstance = axios.create({
 // ========================================
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage (client-side only)
+    // Get token from storage (client-side only)
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem(TOKEN_KEY);
+      const token = getAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -157,7 +164,7 @@ apiClient.interceptors.response.use(
           }
 
           // Try to refresh token
-          const refreshToken = localStorage.getItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
+          const refreshToken = getRefreshToken();
 
           if (refreshToken) {
             if (isRefreshing) {
@@ -188,7 +195,7 @@ apiClient.interceptors.response.use(
                 const newRefreshToken = (response.data.data as any).refreshToken;
 
                 if (newAccessToken) {
-                  localStorage.setItem(TOKEN_KEY, newAccessToken);
+                  setAccessToken(newAccessToken);
                   // Update authorization header
                   if (originalRequest.headers) {
                     originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -196,7 +203,7 @@ apiClient.interceptors.response.use(
                 }
 
                 if (newRefreshToken) {
-                  localStorage.setItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token', newRefreshToken);
+                  setRefreshToken(newRefreshToken);
                 }
 
                 processQueue(null);
@@ -210,9 +217,7 @@ apiClient.interceptors.response.use(
               isRefreshing = false;
 
               // Clear tokens and redirect
-              localStorage.removeItem(TOKEN_KEY);
-              localStorage.removeItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
-              localStorage.removeItem('ezyfix_user_data');
+              clearAllAuthData();
 
               // Portal-aware redirect
               if (pathname.startsWith('/support')) {
@@ -225,8 +230,7 @@ apiClient.interceptors.response.use(
             }
           } else {
             // No refresh token, redirect to login
-            localStorage.removeItem(TOKEN_KEY);
-            localStorage.removeItem('ezyfix_user_data');
+            clearAllAuthData();
 
             // Portal-aware redirect
             if (pathname.startsWith('/support')) {
@@ -335,9 +339,9 @@ export const setAuthToken = (token: string | null): void => {
   }
 
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    setAccessToken(token);
   } else {
-    localStorage.removeItem(TOKEN_KEY);
+    clearAllAuthData();
   }
 };
 
@@ -348,7 +352,7 @@ export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') {
     return null;
   }
-  return localStorage.getItem(TOKEN_KEY);
+  return getAccessToken();
 };
 
 /**
@@ -359,9 +363,7 @@ export const clearAuthData = (): void => {
     return;
   }
 
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token');
-  localStorage.removeItem('ezyfix_user_data'); // Clear user data as well
+  clearAllAuthData();
 };
 
 // ========================================

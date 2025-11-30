@@ -11,6 +11,13 @@ import type {
   RegisterRequest,
 } from '@/types/api';
 import { getRoleFromJWT } from '@/utils/jwt';
+import {
+  getAccessToken,
+  getRefreshToken,
+  getUserData,
+  setRefreshToken as setRefreshTokenStorage,
+  setUserData,
+} from '@/utils/storage';
 
 import apiClient, { clearAuthData, setAuthToken } from './ApiClient';
 
@@ -28,8 +35,6 @@ const AUTH_ENDPOINTS = {
   CHANGE_PASSWORD: '/auth/change-password',
   DELETE_REFRESH_TOKEN: '/auth/delete-refresh-token',
 } as const;
-
-const REFRESH_TOKEN_KEY = process.env.NEXT_PUBLIC_REFRESH_TOKEN_KEY || 'ezyfix_refresh_token';
 
 // ========================================
 // Auth Service Class
@@ -57,7 +62,7 @@ class AuthService {
         this.setRefreshToken(apiResponse.data.refreshToken);
       }
 
-      // Store user data in localStorage for getCurrentUser()
+      // Store user data for getCurrentUser()
       if (typeof window !== 'undefined') {
         const userData = {
           id: apiResponse.data.id,
@@ -67,7 +72,7 @@ class AuthService {
           isActive: apiResponse.data.isActive,
           isPasswordExpired: apiResponse.data.isPasswordExpired,
         };
-        localStorage.setItem('ezyfix_user_data', JSON.stringify(userData));
+        setUserData(userData);
       }
     }
 
@@ -132,9 +137,9 @@ class AuthService {
         return null;
       }
 
-      // Get token from localStorage
+      // Get token from storage
       const token = typeof window !== 'undefined'
-        ? localStorage.getItem(process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'ezyfix_admin_token')
+        ? getAccessToken()
         : null;
 
       if (!token) {
@@ -144,22 +149,22 @@ class AuthService {
       // Decode JWT to get user info
       const role = getRoleFromJWT(token);
 
-      // Get user data from localStorage (saved during login)
-      const userDataStr = typeof window !== 'undefined'
-        ? localStorage.getItem('ezyfix_user_data')
+      // Get user data from storage (saved during login)
+      const userData = typeof window !== 'undefined'
+        ? getUserData()
         : null;
 
-      if (!userDataStr) {
-        // If no user data in localStorage, we only have the token
+      if (!userData) {
+        // If no user data in storage, we only have the token
         // We can't fetch from /auth/me because it doesn't exist
         // So we return null and user will need to login again
         return null;
       }
 
-      const userData = JSON.parse(userDataStr) as AuthUser;
+      const userInfo = userData as AuthUser;
 
       return {
-        ...userData,
+        ...userInfo,
         role: role || undefined,
       };
     } catch {
@@ -248,9 +253,7 @@ class AuthService {
       return false;
     }
 
-    const token = localStorage.getItem(
-      process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'ezyfix_admin_token',
-    );
+    const token = getAccessToken();
     return !!token;
   }
 
@@ -261,7 +264,7 @@ class AuthService {
     if (typeof window === 'undefined') {
       return;
     }
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    setRefreshTokenStorage(token);
   }
 
   /**
@@ -271,7 +274,7 @@ class AuthService {
     if (typeof window === 'undefined') {
       return null;
     }
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return getRefreshToken();
   }
 }
 
