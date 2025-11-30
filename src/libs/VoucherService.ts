@@ -20,6 +20,8 @@ import type {
 
 import axios from 'axios';
 
+import { getAccessToken } from '@/utils/storage';
+
 // Create axios instance for voucher APIs (has /v1 prefix)
 const voucherApiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ezyfix.up.railway.app'}/api/v1`,
@@ -32,7 +34,7 @@ const voucherApiClient = axios.create({
 // Add auth token interceptor
 voucherApiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('ezyfix_admin_token');
+    const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
