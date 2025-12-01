@@ -64,7 +64,7 @@ function SupportLoginForm() {
         icon: <ShieldCheck className="h-5 w-5" />,
       });
       setTimeout(() => {
-        router.push('/support');
+        router.push('/support/disputes');
       }, 1000);
     } catch (error: any) {
       // Login failed - show error toast with message from error or backend

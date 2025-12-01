@@ -77,11 +77,6 @@ export default function PortalLayoutClient({ children }: { children: React.React
   // Support menu items
   const supportMenuItems = [
     {
-      title: 'Tổng quan',
-      href: '/support',
-      icon: LayoutDashboard,
-    },
-    {
       title: 'Tranh chấp',
       href: '/support/disputes',
       icon: AlertTriangle,
