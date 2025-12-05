@@ -814,14 +814,8 @@ export default function AppointmentsPage() {
                     </button>
 
                     <div className="grid grid-cols-2 gap-2">
-                      {['CANCELLED', 'REPAIRED', 'DISPUTE'].includes(normalizeStatus(appointment.status) || '')
+                      {!['CANCELLED', 'REPAIRED', 'DISPUTE'].includes(normalizeStatus(appointment.status) || '')
                         ? (
-                            <>
-                              <div />
-                              <div />
-                            </>
-                          )
-                        : (
                             <>
                               <button
                                 type="button"
@@ -842,28 +836,21 @@ export default function AppointmentsPage() {
                                 type="button"
                                 onClick={() => {
                                   setSelectedAppointment(appointment);
-                                  setReassignModal(true);
+                                  setCancelModal(true);
                                 }}
-                                className="rounded-lg border border-blue-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-blue-600 transition-colors hover:bg-blue-50"
+                                className="rounded-lg border border-red-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-red-600 transition-colors hover:bg-red-50"
                               >
-                                Đổi thợ
+                                Hủy
                               </button>
+                            </>
+                          )
+                        : (
+                            <>
+                              <div />
+                              <div />
                             </>
                           )}
                     </div>
-
-                    {!['CANCELLED', 'REPAIRED', 'ABSENT', 'DISPUTE'].includes(normalizeStatus(appointment.status) || '') && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedAppointment(appointment);
-                          setCancelModal(true);
-                        }}
-                        className="w-full rounded-lg border border-red-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-red-600 transition-colors hover:bg-red-50"
-                      >
-                        Hủy
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}
