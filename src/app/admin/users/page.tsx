@@ -68,6 +68,7 @@ export default function UsersPage() {
   const [verifyStatus, setVerifyStatus] = useState(true);
   const [verifyNotes, setVerifyNotes] = useState('');
   const [resetReason, setResetReason] = useState('');
+  const [generateTempPassword, setGenerateTempPassword] = useState(true);
   const [sendEmail, setSendEmail] = useState(true);
 
   // Loading states
@@ -232,6 +233,7 @@ export default function UsersPage() {
   const handleResetPassword = (user: User) => {
     setSelectedUser(user);
     setResetReason('');
+    setGenerateTempPassword(true);
     setSendEmail(true);
     setResetPasswordModal(true);
   };
@@ -244,7 +246,7 @@ export default function UsersPage() {
     try {
       setIsResetting(true);
       const request: ResetPasswordRequest = {
-        generateTemporaryPassword: true,
+        generateTemporaryPassword: generateTempPassword,
         sendEmail,
         reason: resetReason.trim() || undefined,
       };
@@ -1054,26 +1056,60 @@ export default function UsersPage() {
                 {' '}
                 <span className="font-medium">{selectedUser.fullName}</span>
               </p>
-              <div className="mb-4">
-                <label className="flex items-center gap-2">
+
+              <div className="mb-4 rounded-lg bg-blue-50 p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Lưu ý:</strong>
+                  {' '}
+                  Người dùng sẽ bị buộc đổi mật khẩu khi đăng nhập lần tiếp theo.
+                </p>
+              </div>
+
+              <div className="mb-4 space-y-3">
+                <div className="flex items-start gap-2">
                   <input
                     type="checkbox"
+                    id="generate-temp-password"
+                    checked={generateTempPassword}
+                    onChange={e => setGenerateTempPassword(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="generate-temp-password" className="flex-1 cursor-pointer">
+                    <span className="text-sm font-medium text-gray-700">Tạo mật khẩu tạm thời</span>
+                    <p className="text-xs text-gray-500">
+                      Tự động tạo mật khẩu ngẫu nhiên (12 ký tự) và gửi cho người dùng. Nếu bỏ chọn, chỉ gửi link reset password.
+                    </p>
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="send-email-reset"
                     checked={sendEmail}
                     onChange={e => setSendEmail(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium text-gray-700">Gửi email cho người dùng</span>
-                </label>
+                  <label htmlFor="send-email-reset" className="flex-1 cursor-pointer">
+                    <span className="text-sm font-medium text-gray-700">Gửi email cho người dùng</span>
+                    <p className="text-xs text-gray-500">
+                      {generateTempPassword
+                        ? 'Gửi email kèm mật khẩu tạm thời. Nếu bỏ chọn, mật khẩu sẽ hiển thị trên màn hình.'
+                        : 'Gửi email kèm link reset password (valid 24h).'}
+                    </p>
+                  </label>
+                </div>
               </div>
+
               <div className="mb-4">
-                <label htmlFor="reset-reason" className="mb-2 block text-sm font-medium text-gray-700">Lý do</label>
+                <label htmlFor="reset-reason" className="mb-2 block text-sm font-medium text-gray-700">Lý do (không bắt buộc)</label>
                 <textarea
                   id="reset-reason"
                   value={resetReason}
                   onChange={e => setResetReason(e.target.value)}
                   rows={3}
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  placeholder="Nhập lý do (không bắt buộc)..."
+                  placeholder="VD: Hoạt động đáng ngờ, người dùng yêu cầu..."
                 />
               </div>
               <div className="flex gap-3">
