@@ -757,21 +757,6 @@ export default function AppointmentsPage() {
                         {new Date(appointment.scheduledDate).toLocaleDateString('vi-VN')}
                       </span>
                     </div>
-                    {appointment.actualStartTime && (
-                      <p className="text-xs text-gray-500">
-                        Bắt đầu:
-                        {' '}
-                        {new Date(appointment.actualStartTime).toLocaleTimeString('vi-VN', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                        {' '}
-                        {new Date(appointment.actualStartTime).toLocaleDateString('vi-VN', {
-                          day: '2-digit',
-                          month: '2-digit',
-                        })}
-                      </p>
-                    )}
                     {appointment.lastGpsUpdate && (
                       <div className="flex items-center gap-1.5">
                         <Navigation className="h-3.5 w-3.5 text-green-500" />
