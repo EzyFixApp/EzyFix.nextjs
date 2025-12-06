@@ -476,9 +476,6 @@ export default function UsersPage() {
                         <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                           Xác thực
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                          Ngày tạo
-                        </th>
                         <th className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                           Profile
                         </th>
@@ -547,11 +544,6 @@ export default function UsersPage() {
                               : (
                                   <X className="mx-auto h-5 w-5 text-gray-400" />
                                 )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {new Date(user.createdDate).toLocaleDateString('vi-VN')}
-                            </div>
                           </td>
                           <td className="px-6 py-4 text-center whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
