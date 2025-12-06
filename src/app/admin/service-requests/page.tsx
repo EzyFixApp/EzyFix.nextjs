@@ -22,7 +22,6 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -805,25 +804,18 @@ export default function ServiceRequestsPage() {
                   {/* Media */}
                   {requestDetails.media.length > 0 && (
                     <div>
-                      <h3 className="mb-3 text-lg font-semibold text-gray-900">
-                        Hình ảnh/Video (
-                        {requestDetails.media.length}
-                        )
-                      </h3>
-                      <div className="grid grid-cols-3 gap-3">
-                        {requestDetails.media.map(media => (
-                          <div key={media.mediaId} className="relative aspect-square overflow-hidden rounded-lg border border-gray-200">
-                            <Image
-                              src={media.url}
-                              alt={media.mediaType}
-                              fill
-                              className="object-cover"
-                            />
-                            <div className="absolute right-0 bottom-0 left-0 bg-black/50 px-2 py-1 text-xs text-white">
-                              {media.mediaType}
-                            </div>
-                          </div>
-                        ))}
+                      <h3 className="mb-3 text-lg font-semibold text-gray-900">Ảnh/Video đính kèm</h3>
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <ImageIcon className="h-5 w-5" />
+                          <span className="text-sm font-medium">
+                            Có kèm
+                            {' '}
+                            {requestDetails.media.length}
+                            {' '}
+                            ảnh/video
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
