@@ -671,22 +671,6 @@ export default function PaymentsPage() {
                               {new Date(paymentDetails.appointment.scheduledDate).toLocaleDateString('vi-VN')}
                             </p>
                           </div>
-                          {paymentDetails.appointment.actualStartTime && (
-                            <div>
-                              <p className="text-sm text-gray-600">Bắt đầu thực tế</p>
-                              <p className="font-medium text-gray-900">
-                                {formatDate(paymentDetails.appointment.actualStartTime)}
-                              </p>
-                            </div>
-                          )}
-                          {paymentDetails.appointment.actualEndTime && (
-                            <div>
-                              <p className="text-sm text-gray-600">Kết thúc</p>
-                              <p className="font-medium text-gray-900">
-                                {formatDate(paymentDetails.appointment.actualEndTime)}
-                              </p>
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -765,7 +749,6 @@ export default function PaymentsPage() {
                                     {translateWalletReason(tx.reason)}
                                   </p>
                                   <p className="text-sm text-gray-600">{tx.note.includes('Net after commission') ? tx.note.replace('Net after commission', 'Sau khi trừ hoa hồng') : tx.note}</p>
-                                  <p className="text-xs text-gray-500">{formatDate(tx.createdAt)}</p>
                                 </div>
                                 <div className="text-right">
                                   <p className={`text-lg font-bold ${tx.type === 'Credit' ? 'text-green-600' : 'text-red-600'}`}>
@@ -794,11 +777,6 @@ export default function PaymentsPage() {
                                     Mã:
                                     {' '}
                                     {voucher.voucherCode}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    Sử dụng:
-                                    {' '}
-                                    {formatDate(voucher.usedAt)}
                                   </p>
                                 </div>
                                 <div className="text-right">
