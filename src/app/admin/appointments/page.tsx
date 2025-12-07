@@ -37,6 +37,7 @@ export default function AppointmentsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [technicianSearch, setTechnicianSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
   const [showOnlyIssues, setShowOnlyIssues] = useState(false);
   const [summary, setSummary] = useState({
@@ -647,7 +648,7 @@ export default function AppointmentsPage() {
 
       {/* Filters */}
       <div className="rounded-lg bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
           {/* Search */}
           <div className="relative">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -656,6 +657,18 @@ export default function AppointmentsPage() {
               placeholder="Tìm theo tên, địa chỉ, ID..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Technician Search */}
+          <div className="relative">
+            <UserCog className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên thợ..."
+              value={technicianSearch}
+              onChange={e => setTechnicianSearch(e.target.value)}
               className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-blue-500 focus:outline-none"
             />
           </div>
@@ -706,7 +719,7 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Appointments List */}
-      <div className="space-y-3 overflow-x-auto">
+      <div className="space-y-3">
         {isLoading
           ? (
               <div className="rounded-lg bg-white p-8 text-center shadow-sm">
@@ -721,190 +734,198 @@ export default function AppointmentsPage() {
                   <p className="text-gray-500">Không tìm thấy lịch hẹn nào</p>
                 </div>
               )
-            : appointments.map(appointment => (
-                <div
-                  key={appointment.appointmentId}
-                  className="grid min-w-max grid-cols-[90px_150px_400px_200px_220px_160px_200px] items-center gap-6 rounded-lg border border-gray-200 bg-white p-5 transition-all hover:border-blue-300 hover:shadow-md"
-                >
-                  {/* Status Icon with Badge */}
-                  <div className="flex flex-col items-center gap-1.5">
-                    <div className={`flex h-14 w-14 items-center justify-center rounded-full ${getStatusColor(appointment.status)}`}>
-                      {getStatusIcon(appointment.status)}
+            : appointments
+                .filter((appointment) => {
+                  if (!technicianSearch.trim()) {
+                    return true;
+                  }
+                  const search = technicianSearch.toLowerCase();
+                  return appointment.technicianName?.toLowerCase().includes(search);
+                })
+                .map(appointment => (
+                  <div
+                    key={appointment.appointmentId}
+                    className="grid grid-cols-[minmax(70px,90px)_minmax(120px,150px)_minmax(200px,1fr)_minmax(150px,200px)_minmax(180px,220px)_minmax(140px,160px)_minmax(150px,200px)] items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-blue-300 hover:shadow-md"
+                  >
+                    {/* Status Icon with Badge */}
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ${getStatusColor(appointment.status)}`}>
+                        {getStatusIcon(appointment.status)}
+                      </div>
+                      <span className="text-center text-xs font-medium text-gray-600">
+                        {getStatusText(appointment.status)}
+                      </span>
                     </div>
-                    <span className="text-center text-xs font-medium text-gray-600">
-                      {getStatusText(appointment.status)}
-                    </span>
-                  </div>
 
-                  {/* ID & Status Flags */}
-                  <div className="flex flex-col gap-1.5">
-                    <p className="font-mono text-xs text-gray-500">
-                      ID:
-                      {' '}
-                      {appointment.appointmentId.slice(0, 8)}
-                      ...
-                    </p>
-                    <div className="flex flex-col gap-1">
-                      {appointment.hasDispute && (
-                        <span className="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
-                          <AlertTriangle className="h-3 w-3" />
-                          Tranh chấp
-                        </span>
-                      )}
-                      {appointment.issueFlags.map((flag) => {
-                        const isOverdue = flag.toUpperCase() === 'OVERDUE';
-                        return (
-                          <span
-                            key={flag}
-                            className={`rounded px-2 py-1 text-xs font-medium ${
-                              isOverdue
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-orange-100 text-orange-700'
-                            }`}
-                          >
-                            {flag}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Customer Info */}
-                  <div className="flex min-w-0 flex-col gap-2 overflow-hidden">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <User className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <span className="truncate font-medium text-gray-900">
-                        {appointment.customerName}
-                      </span>
-                    </div>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <span className="truncate text-sm text-gray-600">
-                        {appointment.customerPhone}
-                      </span>
-                    </div>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <MapPin className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <span
-                        className="truncate text-xs text-gray-500"
-                        title={appointment.serviceAddress}
-                      >
-                        {appointment.serviceAddress}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Technician Info */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <UserCog className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                      <span className="truncate font-medium text-gray-900">
-                        {appointment.technicianName}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 flex-shrink-0 text-blue-400" />
-                      <span className="text-sm text-gray-600">
-                        {appointment.technicianPhone}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Schedule & GPS */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700">
-                        Hẹn:
+                    {/* ID & Status Flags */}
+                    <div className="flex flex-col gap-1.5">
+                      <p className="font-mono text-xs text-gray-500">
+                        ID:
                         {' '}
-                        {new Date(appointment.scheduledDate).toLocaleDateString('vi-VN')}
-                      </span>
+                        {appointment.appointmentId.slice(0, 8)}
+                        ...
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {appointment.hasDispute && (
+                          <span className="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
+                            <AlertTriangle className="h-3 w-3" />
+                            Tranh chấp
+                          </span>
+                        )}
+                        {appointment.issueFlags.map((flag) => {
+                          const isOverdue = flag.toUpperCase() === 'OVERDUE';
+                          return (
+                            <span
+                              key={flag}
+                              className={`rounded px-2 py-1 text-xs font-medium ${
+                                isOverdue
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-orange-100 text-orange-700'
+                              }`}
+                            >
+                              {flag}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
-                    {appointment.lastGpsUpdate && (
-                      <div className="flex items-center gap-1.5">
-                        <Navigation className="h-3.5 w-3.5 text-green-500" />
-                        <span className="text-xs text-green-600">
-                          GPS:
-                          {' '}
-                          {new Date(appointment.lastGpsUpdate).toLocaleTimeString('vi-VN', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+
+                    {/* Customer Info */}
+                    <div className="flex min-w-0 flex-col gap-2 overflow-hidden">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <User className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                        <span className="truncate font-medium text-gray-900">
+                          {appointment.customerName}
                         </span>
                       </div>
-                    )}
-                  </div>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                        <span className="truncate text-sm text-gray-600">
+                          {appointment.customerPhone}
+                        </span>
+                      </div>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <MapPin className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                        <span
+                          className="truncate text-xs text-gray-500"
+                          title={appointment.serviceAddress}
+                        >
+                          {appointment.serviceAddress}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Pricing */}
-                  <div className="flex flex-col items-end gap-1.5">
-                    <p className="text-xs text-gray-500">Giá dự kiến</p>
-                    <p className="font-semibold text-gray-700">
-                      {formatCurrency(appointment.estimatedCost)}
-                    </p>
-                    {appointment.finalCost !== appointment.estimatedCost && (
-                      <>
-                        <p className="text-xs text-gray-500">Giá cuối cùng</p>
-                        <p className="text-lg font-bold text-blue-600">
-                          {formatCurrency(appointment.finalCost)}
-                        </p>
-                      </>
-                    )}
-                  </div>
+                    {/* Technician Info */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <UserCog className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                        <span className="truncate font-medium text-gray-900">
+                          {appointment.technicianName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 flex-shrink-0 text-blue-400" />
+                        <span className="text-sm text-gray-600">
+                          {appointment.technicianPhone}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleViewDetails(appointment)}
-                      className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700"
-                    >
-                      Xem chi tiết
-                    </button>
+                    {/* Schedule & GPS */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Hẹn:
+                          {' '}
+                          {new Date(appointment.scheduledDate).toLocaleDateString('vi-VN')}
+                        </span>
+                      </div>
+                      {appointment.lastGpsUpdate && (
+                        <div className="flex items-center gap-1.5">
+                          <Navigation className="h-3.5 w-3.5 text-green-500" />
+                          <span className="text-xs text-green-600">
+                            GPS:
+                            {' '}
+                            {new Date(appointment.lastGpsUpdate).toLocaleTimeString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      {!['CANCELLED', 'REPAIRED', 'DISPUTE'].includes(normalizeStatus(appointment.status) || '')
-                        ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedAppointment(appointment);
-                                  setNewStatus('');
-                                  setUpdateReason('');
-                                  setSkipValidation(true);
-                                  setNewStatusError('');
-                                  setUpdateReasonError('');
-                                  setUpdateStatusModal(true);
-                                }}
-                                className="rounded-lg border border-green-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-green-600 transition-colors hover:bg-green-50"
-                              >
-                                Đổi trạng thái
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedAppointment(appointment);
-                                  setCancelModal(true);
-                                }}
-                                className="rounded-lg border border-red-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-red-600 transition-colors hover:bg-red-50"
-                              >
-                                Hủy
-                              </button>
-                            </>
-                          )
-                        : (
-                            <>
-                              <div />
-                              <div />
-                            </>
-                          )}
+                    {/* Pricing */}
+                    <div className="flex flex-col items-end gap-1.5">
+                      <p className="text-xs text-gray-500">Giá dự kiến</p>
+                      <p className="font-semibold text-gray-700">
+                        {formatCurrency(appointment.estimatedCost)}
+                      </p>
+                      {appointment.finalCost !== appointment.estimatedCost && (
+                        <>
+                          <p className="text-xs text-gray-500">Giá cuối cùng</p>
+                          <p className="text-lg font-bold text-blue-600">
+                            {formatCurrency(appointment.finalCost)}
+                          </p>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleViewDetails(appointment)}
+                        className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700"
+                      >
+                        Xem chi tiết
+                      </button>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {!['CANCELLED', 'REPAIRED', 'DISPUTE'].includes(normalizeStatus(appointment.status) || '')
+                          ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAppointment(appointment);
+                                    setNewStatus('');
+                                    setUpdateReason('');
+                                    setSkipValidation(true);
+                                    setNewStatusError('');
+                                    setUpdateReasonError('');
+                                    setUpdateStatusModal(true);
+                                  }}
+                                  className="rounded-lg border border-green-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-green-600 transition-colors hover:bg-green-50"
+                                >
+                                  Đổi trạng thái
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAppointment(appointment);
+                                    setCancelModal(true);
+                                  }}
+                                  className="rounded-lg border border-red-600 px-2 py-1.5 text-xs font-medium whitespace-nowrap text-red-600 transition-colors hover:bg-red-50"
+                                >
+                                  Hủy
+                                </button>
+                              </>
+                            )
+                          : (
+                              <>
+                                <div />
+                                <div />
+                              </>
+                            )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
       </div>
 
-      {/* View Details Modal */}
+      {/* Pagination */}
       {viewDetailsModal && selectedAppointment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6">
