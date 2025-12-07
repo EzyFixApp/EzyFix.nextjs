@@ -6,6 +6,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -66,6 +67,11 @@ export default function PortalLayoutClient({ children }: { children: React.React
       title: 'Voucher',
       href: '/admin/vouchers',
       icon: Ticket,
+    },
+    {
+      title: 'Dòng tiền',
+      href: '/admin/payments',
+      icon: CreditCard,
     },
     {
       title: 'Tài chính',
