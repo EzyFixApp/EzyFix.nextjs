@@ -664,7 +664,7 @@ export default function AppointmentsPage() {
             : appointments.map(appointment => (
                 <div
                   key={appointment.appointmentId}
-                  className="grid min-w-max grid-cols-[90px_150px_minmax(220px,1fr)_200px_220px_160px_200px] items-center gap-6 rounded-lg border border-gray-200 bg-white p-5 transition-all hover:border-blue-300 hover:shadow-md"
+                  className="grid min-w-max grid-cols-[90px_150px_400px_200px_220px_160px_200px] items-center gap-6 rounded-lg border border-gray-200 bg-white p-5 transition-all hover:border-blue-300 hover:shadow-md"
                 >
                   {/* Status Icon with Badge */}
                   <div className="flex flex-col items-center gap-1.5">
@@ -710,24 +710,27 @@ export default function AppointmentsPage() {
                   </div>
 
                   {/* Customer Info */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 flex-col gap-2 overflow-hidden">
+                    <div className="flex min-w-0 items-center gap-2">
                       <User className="h-4 w-4 flex-shrink-0 text-gray-400" />
                       <span className="truncate font-medium text-gray-900">
                         {appointment.customerName}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
                       <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <span className="text-sm text-gray-600">
+                      <span className="truncate text-sm text-gray-600">
                         {appointment.customerPhone}
                       </span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
-                      <p className="line-clamp-2 text-xs text-gray-500">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <MapPin className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                      <span
+                        className="truncate text-xs text-gray-500"
+                        title={appointment.serviceAddress}
+                      >
                         {appointment.serviceAddress}
-                      </p>
+                      </span>
                     </div>
                   </div>
 
