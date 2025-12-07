@@ -299,6 +299,24 @@ export default function FinancialPage() {
     }).format(date);
   };
 
+  const maskAccountNumber = (accountNumber: string, status: PayoutStatus) => {
+    // Only mask for final statuses (PAID or REJECTED)
+    if (status !== 'PAID' && status !== 'REJECTED') {
+      return accountNumber;
+    }
+
+    if (accountNumber.length <= 5) {
+      return accountNumber;
+    }
+
+    const firstThree = accountNumber.slice(0, 3);
+    const lastTwo = accountNumber.slice(-2);
+    const middleLength = accountNumber.length - 5;
+    const masked = '*'.repeat(middleLength);
+
+    return `${firstThree}${masked}${lastTwo}`;
+  };
+
   const getStatusBadge = (status: PayoutStatus) => {
     const statusConfig = {
       PENDING: {
@@ -523,7 +541,7 @@ export default function FinancialPage() {
                               {payout.receiverName}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {payout.receiverAccount}
+                              {maskAccountNumber(payout.receiverAccount, payout.status)}
                               {' '}
                               (
                               {payout.bankCode}
@@ -710,7 +728,7 @@ export default function FinancialPage() {
                       Số tài khoản
                     </div>
                     <div className="mt-1 text-blue-900">
-                      {selectedPayout.receiverAccount}
+                      {maskAccountNumber(selectedPayout.receiverAccount, selectedPayout.status)}
                     </div>
                   </div>
                   <div>
