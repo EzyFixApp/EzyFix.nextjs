@@ -28,7 +28,7 @@ export default function FinancialPage() {
   const [statusFilter, setStatusFilter] = useState<PayoutStatus | 'ALL'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [_totalItems, setTotalItems] = useState(0);
 
   const [viewModal, setViewModal] = useState(false);
   const [approveModal, setApproveModal] = useState(false);
@@ -57,7 +57,7 @@ export default function FinancialPage() {
       setIsLoading(true);
       const params: any = {
         page: currentPage,
-        pageSize: 20,
+        pageSize: 10,
       };
 
       if (statusFilter !== 'ALL') {
@@ -611,38 +611,37 @@ export default function FinancialPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-5 py-4">
-            <div className="text-sm text-gray-600">
-              Hiển thị
-              {' '}
-              <span className="font-semibold text-gray-900">
-                {filteredPayouts.length}
-              </span>
-              {' '}
-              /
-              {' '}
-              <span className="font-semibold text-gray-900">{totalItems}</span>
-              {' '}
-              yêu cầu
-            </div>
-            <div className="flex gap-2">
+          <div className="flex items-center justify-center gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4">
+            <button
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={currentPage === 1}
+              type="button"
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Trước
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={currentPage === 1}
+                key={page}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  page === currentPage
+                    ? 'bg-blue-600 text-white'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                }`}
                 type="button"
-                onClick={() => setCurrentPage(currentPage - 1)}
+                onClick={() => setCurrentPage(page)}
               >
-                Trước
+                {page}
               </button>
-              <button
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={currentPage === totalPages}
-                type="button"
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                Sau
-              </button>
-            </div>
+            ))}
+            <button
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={currentPage === totalPages}
+              type="button"
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Sau
+            </button>
           </div>
         )}
       </div>

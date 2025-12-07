@@ -33,7 +33,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { toast } from 'sonner';
 
 import RevenueAnalyticsService from '@/libs/RevenueAnalyticsService';
 
@@ -55,67 +54,78 @@ export default function AdminDashboard() {
         setIsLoading(true);
         const dateParams = RevenueAnalyticsService.getDateRange(dateRange);
 
-        // Parallel fetch all analytics data (5 APIs)
-        const [overviewRes, serviceRes, technicianRes, transactionsRes, commissionRes] = await Promise.all([
-          RevenueAnalyticsService.getRevenueOverview({
+        // Fetch each API independently with error handling
+        // Overview
+        try {
+          const overviewRes = await RevenueAnalyticsService.getRevenueOverview({
             ...dateParams,
             groupBy: 'day',
-          }),
-          RevenueAnalyticsService.getRevenueByService({
+          });
+          if (overviewRes.is_success) {
+            setRevenueOverview(overviewRes.data);
+          }
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+          // Dashboard vẫn load được, chỉ section này bị lỗi
+        }
+
+        // Revenue by service
+        try {
+          const serviceRes = await RevenueAnalyticsService.getRevenueByService({
             ...dateParams,
             top: 5,
-          }),
-          RevenueAnalyticsService.getRevenueByTechnician({
+          });
+          if (serviceRes.is_success) {
+            setRevenueByService(serviceRes.data);
+          }
+        } catch (error) {
+          console.error('Error fetching revenue by service:', error);
+        }
+
+        // Revenue by technician
+        try {
+          const technicianRes = await RevenueAnalyticsService.getRevenueByTechnician({
             ...dateParams,
             sortBy: 'revenue',
             order: 'desc',
             top: 5,
-          }),
-          RevenueAnalyticsService.getTransactions({
+          });
+          if (technicianRes.is_success) {
+            setTopTechnicians(technicianRes.data);
+          }
+        } catch (error) {
+          console.error('Error fetching revenue by technician:', error);
+        }
+
+        // Transactions
+        try {
+          const transactionsRes = await RevenueAnalyticsService.getTransactions({
             fromDate: dateParams.fromDate,
             toDate: dateParams.toDate,
             page: 1,
             pageSize: 10,
-          }),
-          RevenueAnalyticsService.getCommissionReport({
+          });
+          if (transactionsRes.is_success) {
+            setTransactions(transactionsRes.data);
+          }
+        } catch (error) {
+          console.error('Error fetching transactions:', error);
+        }
+
+        // Commission report
+        try {
+          const commissionRes = await RevenueAnalyticsService.getCommissionReport({
             ...dateParams,
             groupBy: 'service',
-          }),
-        ]);
-
-        if (overviewRes.is_success) {
-          setRevenueOverview(overviewRes.data);
-        } else {
-          toast.error('Không thể tải dữ liệu tổng quan doanh thu');
-        }
-
-        if (serviceRes.is_success) {
-          setRevenueByService(serviceRes.data);
-        } else {
-          toast.error('Không thể tải dữ liệu doanh thu theo dịch vụ');
-        }
-
-        if (technicianRes.is_success) {
-          setTopTechnicians(technicianRes.data);
-        } else {
-          toast.error('Không thể tải dữ liệu thợ xuất sắc');
-        }
-
-        if (transactionsRes.is_success) {
-          setTransactions(transactionsRes.data);
-        } else {
-          console.error('❌ Transactions API failed:', transactionsRes);
-          toast.error('Không thể tải dữ liệu giao dịch');
-        }
-
-        if (commissionRes.is_success) {
-          setCommissionReport(commissionRes.data);
-        } else {
-          toast.error('Không thể tải báo cáo hoa hồng');
+          });
+          if (commissionRes.is_success) {
+            setCommissionReport(commissionRes.data);
+          }
+        } catch (error) {
+          console.error('Error fetching commission report:', error);
         }
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        toast.error('Có lỗi xảy ra khi tải dữ liệu dashboard');
+        console.error('Error in fetchDashboardData:', error);
       } finally {
         setIsLoading(false);
       }

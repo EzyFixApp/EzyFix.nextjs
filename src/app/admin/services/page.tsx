@@ -14,7 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 import { useCategories } from '@/hooks/useCategories';
@@ -37,6 +37,8 @@ export default function ServicesPage() {
     'services',
   );
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -179,7 +181,7 @@ export default function ServicesPage() {
     }
   };
 
-  const filteredServices = services
+  const allFilteredServices = services
     .filter(
       service =>
         service.serviceName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -191,6 +193,16 @@ export default function ServicesPage() {
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
     });
+
+  const totalPages = Math.ceil(allFilteredServices.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const filteredServices = allFilteredServices.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to page 1 when search term changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -304,7 +316,7 @@ export default function ServicesPage() {
                     : 'Tìm kiếm yêu cầu dịch vụ...'
                 }
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={e => handleSearchChange(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none"
               />
             </div>
@@ -412,6 +424,42 @@ export default function ServicesPage() {
                       ? 'Thử thay đổi từ khóa tìm kiếm'
                       : 'Chưa có dịch vụ nào trong hệ thống'}
                   </p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
+                  <button
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={currentPage === 1}
+                    type="button"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                  >
+                    Trước
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                        page === currentPage
+                          ? 'bg-blue-600 text-white'
+                          : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                      }`}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={currentPage === totalPages}
+                    type="button"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  >
+                    Sau
+                  </button>
                 </div>
               )}
             </>
