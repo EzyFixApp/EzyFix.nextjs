@@ -39,6 +39,14 @@ export default function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
   const [showOnlyIssues, setShowOnlyIssues] = useState(false);
+  const [summary, setSummary] = useState({
+    total: 0,
+    scheduled: 0,
+    enRoute: 0,
+    repairing: 0,
+    completed: 0,
+    issues: 0,
+  });
 
   // Modals
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
@@ -77,6 +85,17 @@ export default function AppointmentsPage() {
   const [updateReasonError, setUpdateReasonError] = useState('');
   const [newStatusError, setNewStatusError] = useState('');
 
+  // Normalize status to UPPER_SNAKE_CASE format - defined before useEffect
+  const normalizeStatus = (status: string | null): string | null => {
+    if (!status) {
+      return null;
+    }
+    const snakeCase = status
+      .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2')
+      .replace(/([a-z\d])([A-Z])/g, '$1_$2');
+    return snakeCase.toUpperCase();
+  };
+
   // Fetch appointments from API
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -109,6 +128,27 @@ export default function AppointmentsPage() {
         setAppointments(response.items);
         setTotalPages(response.pagination.totalPages);
         setTotalItems(response.pagination.totalItems);
+
+        // Fetch all items to calculate summary if on first page without filters
+        if (currentPage === 1 && statusFilter === 'ALL' && !searchTerm.trim() && !showOnlyIssues) {
+          try {
+            const allResponse = await AppointmentService.getAllAppointments({
+              page: 1,
+              pageSize: 1000, // Large number to get all
+            });
+            const allItems = allResponse.items;
+            setSummary({
+              total: allResponse.pagination.totalItems,
+              scheduled: allItems.filter(a => normalizeStatus(a.status) === 'SCHEDULED').length,
+              enRoute: allItems.filter(a => normalizeStatus(a.status) === 'EN_ROUTE').length,
+              repairing: allItems.filter(a => normalizeStatus(a.status) === 'REPAIRING').length,
+              completed: allItems.filter(a => normalizeStatus(a.status) === 'REPAIRED').length,
+              issues: allItems.filter(a => a.hasDispute || a.issueFlags.length > 0).length,
+            });
+          } catch (error) {
+            console.error('Error fetching summary:', error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching appointments:', error);
         toast.error('Có lỗi xảy ra khi tải dữ liệu');
@@ -119,20 +159,6 @@ export default function AppointmentsPage() {
 
     fetchAppointments();
   }, [currentPage, statusFilter, searchTerm, showOnlyIssues]);
-
-  // Normalize status to UPPER_SNAKE_CASE format
-  const normalizeStatus = (status: string | null): string | null => {
-    if (!status) {
-      return null;
-    }
-    // Convert PascalCase to snake_case first, then uppercase
-    // Scheduled -> SCHEDULED, EnRoute -> EN_ROUTE
-    const snakeCase = status
-      .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2')
-      .replace(/([a-z\d])([A-Z])/g, '$1_$2');
-
-    return snakeCase.toUpperCase();
-  };
 
   // Translate status to Vietnamese
   const translateStatus = (status: string): string => {
@@ -534,14 +560,14 @@ export default function AppointmentsPage() {
     }
   };
 
-  // Calculate stats
+  // Calculate stats - use summary for accurate counts
   const stats = {
-    total: totalItems,
-    scheduled: appointments.filter(a => normalizeStatus(a.status) === 'SCHEDULED').length,
-    enRoute: appointments.filter(a => normalizeStatus(a.status) === 'EN_ROUTE').length,
-    repairing: appointments.filter(a => normalizeStatus(a.status) === 'REPAIRING').length,
-    completed: appointments.filter(a => normalizeStatus(a.status) === 'REPAIRED').length,
-    issues: appointments.filter(a => a.hasDispute || a.issueFlags.length > 0).length,
+    total: summary.total || totalItems,
+    scheduled: summary.scheduled,
+    enRoute: summary.enRoute,
+    repairing: summary.repairing,
+    completed: summary.completed,
+    issues: summary.issues,
   };
 
   return (
