@@ -795,7 +795,9 @@ export default function FinancialPage() {
                 </div>
               )}
 
-              {selectedPayout.vietQrImageBase64 && (
+              {selectedPayout.vietQrImageBase64
+                && selectedPayout.status !== 'PAID'
+                && selectedPayout.status !== 'REJECTED' && (
                 <div className="rounded-lg bg-gray-50 p-4">
                   <h3 className="mb-3 font-semibold text-gray-900">
                     Mã QR chuyển khoản
