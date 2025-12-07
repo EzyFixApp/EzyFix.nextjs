@@ -36,8 +36,9 @@ export default function DisputesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<DisputeStatus | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, _setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [_totalCount, setTotalCount] = useState(0);
   const [summary, setSummary] = useState({
     totalDisputes: 0,
     openDisputes: 0,
@@ -82,6 +83,7 @@ export default function DisputesPage() {
         const response = await DisputeService.getAllDisputes(params);
         setDisputes(response.items);
         setTotalCount(response.totalCount);
+        setTotalPages(Math.ceil(response.totalCount / 10)); // 10 items per page
         setSummary(response.summary);
       } catch (error) {
         console.error('Error fetching disputes:', error);
@@ -578,20 +580,39 @@ export default function DisputesPage() {
             </table>
           </div>
 
-          {/* Pagination info */}
-          {filteredDisputes.length > 0 && (
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
-              <p className="text-sm text-gray-600">
-                Hiển thị
-                {' '}
-                {filteredDisputes.length}
-                {' '}
-                /
-                {' '}
-                {totalCount}
-                {' '}
-                tranh chấp
-              </p>
+          {/* Pagination */}
+          {filteredDisputes.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
+              <button
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={currentPage === 1}
+                type="button"
+                onClick={() => setCurrentPage(currentPage - 1)}
+              >
+                Trước
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                    page === currentPage
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                  }`}
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              <button
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={currentPage === totalPages}
+                type="button"
+                onClick={() => setCurrentPage(currentPage + 1)}
+              >
+                Sau
+              </button>
             </div>
           )}
         </div>
@@ -712,20 +733,17 @@ export default function DisputesPage() {
                                 Từ khách hàng
                               </p>
                               <div className="grid grid-cols-2 gap-2">
-                                {disputeDetails.customerEvidenceUrls.map((url, idx) => {
-                                  const filename = url.substring(url.lastIndexOf('/') + 1);
-                                  return (
-                                    <div key={`customer-${idx}-${filename}`} className="relative h-40 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                                      <Image
-                                        src={url}
-                                        alt={`Customer evidence ${idx + 1}`}
-                                        fill
-                                        unoptimized
-                                        className="object-contain"
-                                      />
-                                    </div>
-                                  );
-                                })}
+                                {disputeDetails.customerEvidenceUrls.map(url => (
+                                  <div key={`customer-${url}`} className="relative h-40 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                                    <Image
+                                      src={url}
+                                      alt="Customer evidence"
+                                      fill
+                                      unoptimized
+                                      className="object-contain"
+                                    />
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}
@@ -734,20 +752,17 @@ export default function DisputesPage() {
                             <div>
                               <p className="mb-2 text-sm font-medium text-gray-600">Từ thợ</p>
                               <div className="grid grid-cols-2 gap-2">
-                                {disputeDetails.technicianEvidenceUrls.map((url, idx) => {
-                                  const filename = url.substring(url.lastIndexOf('/') + 1);
-                                  return (
-                                    <div key={`technician-${idx}-${filename}`} className="relative h-40 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                                      <Image
-                                        src={url}
-                                        alt={`Technician evidence ${idx + 1}`}
-                                        fill
-                                        unoptimized
-                                        className="object-contain"
-                                      />
-                                    </div>
-                                  );
-                                })}
+                                {disputeDetails.technicianEvidenceUrls.map(url => (
+                                  <div key={`technician-${url}`} className="relative h-40 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                                    <Image
+                                      src={url}
+                                      alt="Technician evidence"
+                                      fill
+                                      unoptimized
+                                      className="object-contain"
+                                    />
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}

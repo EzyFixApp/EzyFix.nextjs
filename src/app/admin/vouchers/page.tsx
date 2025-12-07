@@ -35,7 +35,7 @@ export default function VouchersPage() {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     currentPage: 1,
-    pageSize: 20,
+    pageSize: 6,
     totalItems: 0,
     totalPages: 0,
   });
@@ -826,6 +826,42 @@ export default function VouchersPage() {
           <Tag className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 text-lg font-semibold text-gray-900">Không tìm thấy voucher</h3>
           <p className="mt-2 text-sm text-gray-600">Thử thay đổi bộ lọc hoặc tạo voucher mới</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
+          <button
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.currentPage === 1}
+            type="button"
+            onClick={() => setPagination({ ...pagination, currentPage: pagination.currentPage - 1 })}
+          >
+            Trước
+          </button>
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                page === pagination.currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+              }`}
+              type="button"
+              onClick={() => setPagination({ ...pagination, currentPage: page })}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.currentPage === pagination.totalPages}
+            type="button"
+            onClick={() => setPagination({ ...pagination, currentPage: pagination.currentPage + 1 })}
+          >
+            Sau
+          </button>
         </div>
       )}
 

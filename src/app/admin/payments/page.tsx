@@ -33,7 +33,7 @@ export default function PaymentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [_totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'ALL'>('ALL');
   const [showOnlyIssues, setShowOnlyIssues] = useState(false);
@@ -60,7 +60,7 @@ export default function PaymentsPage() {
         setIsLoading(true);
         const params: GetPaymentsParams = {
           page: currentPage,
-          pageSize: 20,
+          pageSize: 10,
         };
 
         if (statusFilter !== 'ALL') {
@@ -462,92 +462,37 @@ export default function PaymentsPage() {
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-6 py-3">
-                      <div className="flex flex-1 justify-between sm:hidden">
+                    <div className="flex items-center justify-center gap-2 border-t border-gray-200 bg-gray-50 px-5 py-4">
+                      <button
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={currentPage === 1}
+                        type="button"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      >
+                        Trước
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <button
+                          key={page}
+                          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                            page === currentPage
+                              ? 'bg-blue-600 text-white'
+                              : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                          }`}
                           type="button"
-                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                          disabled={currentPage === 1}
-                          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                          onClick={() => setCurrentPage(page)}
                         >
-                          Trước
+                          {page}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                          disabled={currentPage === totalPages}
-                          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          Sau
-                        </button>
-                      </div>
-                      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm text-gray-700">
-                            Hiển thị
-                            {' '}
-                            <span className="font-medium">{(currentPage - 1) * 20 + 1}</span>
-                            {' '}
-                            đến
-                            {' '}
-                            <span className="font-medium">
-                              {Math.min(currentPage * 20, totalItems)}
-                            </span>
-                            {' '}
-                            trong
-                            {' '}
-                            <span className="font-medium">{totalItems}</span>
-                            {' '}
-                            kết quả
-                          </p>
-                        </div>
-                        <div>
-                          <nav className="inline-flex -space-x-px rounded-md shadow-sm">
-                            <button
-                              type="button"
-                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                              disabled={currentPage === 1}
-                              className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                            >
-                              Trước
-                            </button>
-                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                              let pageNum;
-                              if (totalPages <= 5) {
-                                pageNum = i + 1;
-                              } else if (currentPage <= 3) {
-                                pageNum = i + 1;
-                              } else if (currentPage >= totalPages - 2) {
-                                pageNum = totalPages - 4 + i;
-                              } else {
-                                pageNum = currentPage - 2 + i;
-                              }
-                              return (
-                                <button
-                                  type="button"
-                                  key={pageNum}
-                                  onClick={() => setCurrentPage(pageNum)}
-                                  className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium ${
-                                    currentPage === pageNum
-                                      ? 'z-10 border-blue-500 bg-blue-50 text-blue-600'
-                                      : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
-                                  }`}
-                                >
-                                  {pageNum}
-                                </button>
-                              );
-                            })}
-                            <button
-                              type="button"
-                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                              disabled={currentPage === totalPages}
-                              className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                            >
-                              Sau
-                            </button>
-                          </nav>
-                        </div>
-                      </div>
+                      ))}
+                      <button
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={currentPage === totalPages}
+                        type="button"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      >
+                        Sau
+                      </button>
                     </div>
                   )}
                 </>

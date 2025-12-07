@@ -33,8 +33,8 @@ export default function AppointmentsPage() {
   // State
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, _setCurrentPage] = useState(1);
-  const [_totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
@@ -84,7 +84,7 @@ export default function AppointmentsPage() {
         setIsLoading(true);
         const params: GetAppointmentsParams = {
           page: currentPage,
-          pageSize: 20,
+          pageSize: 10,
         };
 
         if (statusFilter !== 'ALL') {
@@ -1522,6 +1522,42 @@ export default function AppointmentsPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && !isLoading && (
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-4">
+          <button
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={currentPage === 1}
+            type="button"
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Trước
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                page === currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+              }`}
+              type="button"
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            type="button"
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Sau
+          </button>
         </div>
       )}
     </div>
