@@ -361,12 +361,6 @@ export default function PaymentsPage() {
                             Mã GD
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                            Khách hàng
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                            Thợ
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                             Số tiền
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
@@ -387,7 +381,7 @@ export default function PaymentsPage() {
                         {filteredPayments.length === 0
                           ? (
                               <tr>
-                                <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                   Không tìm thấy giao dịch nào
                                 </td>
                               </tr>
@@ -402,20 +396,6 @@ export default function PaymentsPage() {
                                     {payment.issueFlags.length > 0 && (
                                       <div className="mt-1">{getIssueBadge(payment.issueFlags)}</div>
                                     )}
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2">
-                                      <User className="size-4 text-gray-400" />
-                                      <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                          {payment.customerName}
-                                        </div>
-                                        <div className="text-sm text-gray-500">{payment.customerPhone}</div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4">
-                                    <div className="text-sm text-gray-900">{payment.technicianName}</div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-semibold text-gray-900">
