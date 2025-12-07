@@ -36,6 +36,14 @@ export default function ServiceRequestsPage() {
   const [currentPage, _setCurrentPage] = useState(1);
   const [_totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [summary, setSummary] = useState({
+    total: 0,
+    pending: 0,
+    quoted: 0,
+    accepted: 0,
+    completed: 0,
+    cancelled: 0,
+  });
 
   // Modal states
   const [viewDetailsModal, setViewDetailsModal] = useState(false);
@@ -57,6 +65,18 @@ export default function ServiceRequestsPage() {
   const [updateReason, setUpdateReason] = useState('');
   const [updateReasonError, setUpdateReasonError] = useState('');
   const [notifyAffectedParties, setNotifyAffectedParties] = useState(false);
+
+  // Normalize status to UPPER_SNAKE_CASE format - defined before useEffect
+  const normalizeStatus = (status: string | null): string | null => {
+    if (!status) {
+      return null;
+    }
+    const snakeCase = status
+      .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2')
+      .replace(/([a-z\d])([A-Z])/g, '$1_$2');
+    const result = snakeCase.toUpperCase();
+    return result;
+  };
 
   // Fetch service requests from API
   useEffect(() => {
@@ -87,6 +107,27 @@ export default function ServiceRequestsPage() {
         setServiceRequests(response.items);
         setTotalPages(response.pagination.totalPages);
         setTotalItems(response.pagination.totalItems);
+
+        // Fetch all items to calculate summary if on first page without filters
+        if (currentPage === 1 && statusFilter === 'ALL' && !searchTerm.trim()) {
+          try {
+            const allResponse = await ServiceRequestService.getAllServiceRequests({
+              page: 1,
+              pageSize: 1000, // Large number to get all
+            });
+            const allItems = allResponse.items;
+            setSummary({
+              total: allResponse.pagination.totalItems,
+              pending: allItems.filter(sr => normalizeStatus(sr.status) === 'PENDING').length,
+              quoted: allItems.filter(sr => normalizeStatus(sr.status) === 'QUOTED').length,
+              accepted: allItems.filter(sr => normalizeStatus(sr.status) === 'QUOTE_ACCEPTED').length,
+              completed: allItems.filter(sr => normalizeStatus(sr.status) === 'COMPLETED').length,
+              cancelled: allItems.filter(sr => normalizeStatus(sr.status) === 'CANCELLED').length,
+            });
+          } catch (error) {
+            console.error('Error fetching summary:', error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching service requests:', error);
         toast.error('Có lỗi xảy ra khi tải dữ liệu');
@@ -102,23 +143,6 @@ export default function ServiceRequestsPage() {
   const filteredRequests = useMemo(() => {
     return serviceRequests;
   }, [serviceRequests]);
-
-  // Normalize status to UPPER_SNAKE_CASE format
-  const normalizeStatus = (status: string | null): string | null => {
-    if (!status) {
-      return null;
-    }
-    // Convert PascalCase to snake_case first, then uppercase
-    // QuoteAccepted -> Quote_Accepted -> QUOTE_ACCEPTED
-    // Cancelled -> Cancelled -> CANCELLED
-    const snakeCase = status
-      .replace(/([A-Z])([A-Z][a-z])/g, '$1_$2') // XMLParser -> XML_Parser
-      .replace(/([a-z\d])([A-Z])/g, '$1_$2'); // QuoteAccepted -> Quote_Accepted
-
-    const result = snakeCase.toUpperCase();
-    console.warn(`normalizeStatus: "${status}" -> "${snakeCase}" -> "${result}"`);
-    return result;
-  };
 
   // Helper functions
   const getStatusColor = (status: string | null): string => {
@@ -354,15 +378,14 @@ export default function ServiceRequestsPage() {
     }
   };
 
-  // Calculate stats
-  // Calculate stats
+  // Calculate stats - use summary for accurate counts
   const stats = {
-    total: totalItems,
-    pending: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'PENDING').length,
-    quoted: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'QUOTED').length,
-    accepted: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'QUOTE_ACCEPTED').length,
-    completed: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'COMPLETED').length,
-    cancelled: serviceRequests.filter(sr => normalizeStatus(sr.status) === 'CANCELLED').length,
+    total: summary.total || totalItems,
+    pending: summary.pending,
+    quoted: summary.quoted,
+    accepted: summary.accepted,
+    completed: summary.completed,
+    cancelled: summary.cancelled,
   };
 
   // Loading state
