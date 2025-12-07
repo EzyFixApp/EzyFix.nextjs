@@ -175,6 +175,60 @@ export default function PaymentsPage() {
     );
   };
 
+  // Translate wallet transaction type
+  const translateWalletType = (type: string): string => {
+    const typeMap: Record<string, string> = {
+      Credit: 'Cộng tiền',
+      Debit: 'Trừ tiền',
+    };
+    return typeMap[type] || type;
+  };
+
+  // Translate wallet transaction reason
+  const translateWalletReason = (reason: string): string => {
+    const reasonMap: Record<string, string> = {
+      Earning: 'Thu nhập',
+      Refund: 'Hoàn tiền',
+      Withdrawal: 'Rút tiền',
+      Commission: 'Hoa hồng',
+      Bonus: 'Thưởng',
+      Penalty: 'Phạt',
+    };
+    return reasonMap[reason] || reason;
+  };
+
+  // Translate action to Vietnamese
+  const translateAction = (action: string): string => {
+    const actionMap: Record<string, string> = {
+      Created: 'Tạo mới',
+      Updated: 'Cập nhật',
+      Cancelled: 'Hủy',
+      CHECKING: 'Đang kiểm tra',
+      REPAIRING: 'Đang sửa chữa',
+      REPAIRED: 'Đã sửa xong',
+      SCHEDULED: 'Đã đặt lịch',
+      EN_ROUTE: 'Đang di chuyển',
+      ARRIVED: 'Đã đến',
+    };
+    return actionMap[action] || action;
+  };
+
+  // Translate status for display
+  const translateStatus = (oldValue: string | null, newValue: string | null): string => {
+    if (!oldValue && !newValue) {
+      return '';
+    }
+    const statusMap: Record<string, string> = {
+      SCHEDULED: 'Đã đặt lịch',
+      EN_ROUTE: 'Đang di chuyển',
+      ARRIVED: 'Đã đến',
+      CHECKING: 'Đang kiểm tra',
+      REPAIRING: 'Đang sửa chữa',
+      REPAIRED: 'Đã sửa xong',
+    };
+    return statusMap[newValue?.toUpperCase() || ''] || newValue || '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl">
@@ -759,13 +813,13 @@ export default function PaymentsPage() {
                               >
                                 <div>
                                   <p className="font-medium text-gray-900">
-                                    {tx.type}
+                                    {translateWalletType(tx.type)}
                                     {' '}
                                     -
                                     {' '}
-                                    {tx.reason}
+                                    {translateWalletReason(tx.reason)}
                                   </p>
-                                  <p className="text-sm text-gray-600">{tx.note}</p>
+                                  <p className="text-sm text-gray-600">{tx.note.includes('Net after commission') ? tx.note.replace('Net after commission', 'Sau khi trừ hoa hồng') : tx.note}</p>
                                   <p className="text-xs text-gray-500">{formatDate(tx.createdAt)}</p>
                                 </div>
                                 <div className="text-right">
@@ -830,17 +884,22 @@ export default function PaymentsPage() {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2">
                                     <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                                      {log.action}
+                                      {translateAction(log.action)}
                                     </span>
                                     <span className="text-sm text-gray-600">{log.performedBy}</span>
                                   </div>
                                   {log.oldValue && log.newValue && (
                                     <p className="mt-1 text-sm text-gray-700">
-                                      {log.oldValue}
-                                      {' '}
-                                      →
-                                      {' '}
-                                      {log.newValue}
+                                      {translateStatus(log.oldValue, log.newValue)}
+                                      {log.oldValue && log.oldValue !== log.newValue && (
+                                        <>
+                                          {' '}
+                                          (từ
+                                          {' '}
+                                          {translateStatus(null, log.oldValue)}
+                                          )
+                                        </>
+                                      )}
                                     </p>
                                   )}
                                   <p className="mt-1 text-xs text-gray-500">

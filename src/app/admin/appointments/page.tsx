@@ -134,6 +134,40 @@ export default function AppointmentsPage() {
     return snakeCase.toUpperCase();
   };
 
+  // Translate status to Vietnamese
+  const translateStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      SCHEDULED: 'Đã đặt lịch',
+      EN_ROUTE: 'Đang di chuyển',
+      ARRIVED: 'Đã đến',
+      CHECKING: 'Đang kiểm tra',
+      PRICE_REVIEW: 'Đang báo giá',
+      REPAIRING: 'Đang sửa chữa',
+      REPAIRED: 'Đã sửa xong',
+      CANCELLED: 'Đã hủy',
+      ABSENT: 'Vắng mặt',
+      DISPUTE: 'Tranh chấp',
+      PENDING: 'Chờ xử lý',
+      PAYMENT_SUCCESS: 'Thanh toán thành công',
+      COMPLETE: 'Hoàn thành',
+      FAILED: 'Thất bại',
+      ESCROW: 'Giữ tạm',
+    };
+    const normalized = normalizeStatus(status);
+    return statusMap[normalized || ''] || status;
+  };
+
+  // Translate action to Vietnamese
+  const translateAction = (action: string): string => {
+    const actionMap: Record<string, string> = {
+      Created: 'Tạo mới',
+      Updated: 'Cập nhật',
+      Cancelled: 'Hủy',
+      Assigned: 'Phân công',
+    };
+    return actionMap[action] || action;
+  };
+
   // Status badge color
   const getStatusColor = (status: string | null): string => {
     const normalized = normalizeStatus(status);
@@ -1023,12 +1057,12 @@ export default function AppointmentsPage() {
                                   <div className="flex-1">
                                     <div className="flex items-center justify-between">
                                       <div>
-                                        <span className="font-medium text-gray-800">{item.newValue}</span>
+                                        <span className="font-medium text-gray-800">{translateStatus(item.newValue || '')}</span>
                                         {item.oldValue && (
                                           <span className="ml-2 text-xs text-gray-500">
                                             (từ
                                             {' '}
-                                            {item.oldValue}
+                                            {translateStatus(item.oldValue)}
                                             )
                                           </span>
                                         )}
@@ -1036,7 +1070,7 @@ export default function AppointmentsPage() {
                                       <span className="text-xs text-gray-500">{formatDate(item.performedAt)}</span>
                                     </div>
                                     <p className="text-xs text-gray-600">
-                                      {item.action}
+                                      {translateAction(item.action)}
                                       {' '}
                                       bởi
                                       {' '}
