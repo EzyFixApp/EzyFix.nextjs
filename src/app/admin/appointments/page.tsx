@@ -144,7 +144,7 @@ export default function AppointmentsPage() {
               enRoute: allItems.filter(a => normalizeStatus(a.status) === 'EN_ROUTE').length,
               repairing: allItems.filter(a => normalizeStatus(a.status) === 'REPAIRING').length,
               completed: allItems.filter(a => normalizeStatus(a.status) === 'REPAIRED').length,
-              issues: allItems.filter(a => a.hasDispute || a.issueFlags.length > 0).length,
+              issues: allItems.filter(a => a.hasDispute || a.issueFlags.filter(flag => flag.toUpperCase() !== 'OVERDUE').length > 0).length,
             });
           } catch (error) {
             console.error('Error fetching summary:', error);
@@ -766,27 +766,24 @@ export default function AppointmentsPage() {
                         ...
                       </p>
                       <div className="flex flex-col gap-1">
-                        {appointment.hasDispute && (
+                        {appointment.hasDispute && normalizeStatus(appointment.status) !== 'REPAIRED' && (
                           <span className="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
                             <AlertTriangle className="h-3 w-3" />
                             Tranh chấp
                           </span>
                         )}
-                        {appointment.issueFlags.map((flag) => {
-                          const isOverdue = flag.toUpperCase() === 'OVERDUE';
-                          return (
-                            <span
-                              key={flag}
-                              className={`rounded px-2 py-1 text-xs font-medium ${
-                                isOverdue
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-orange-100 text-orange-700'
-                              }`}
-                            >
-                              {flag}
-                            </span>
-                          );
-                        })}
+                        {normalizeStatus(appointment.status) !== 'REPAIRED' && appointment.issueFlags
+                          .filter(flag => flag.toUpperCase() !== 'OVERDUE')
+                          .map((flag) => {
+                            return (
+                              <span
+                                key={flag}
+                                className="rounded bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700"
+                              >
+                                {flag}
+                              </span>
+                            );
+                          })}
                       </div>
                     </div>
 
